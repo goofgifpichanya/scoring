@@ -18,7 +18,7 @@ import {
 
 export const JudgeView = ({ onSaveSuccess }) => {
   const [selectedCohortId, setSelectedCohortId] = useState('cohort_1');
-  const [selectedTeamCode, setSelectedTeamCode] = useState('');
+  const [selectedTeamCode, setSelectedTeamCode] = useState('บส.');
   const [judgeName, setJudgeName] = useState('กรรมการ 1');
   const [customJudgeName, setCustomJudgeName] = useState('');
   
@@ -38,23 +38,26 @@ export const JudgeView = ({ onSaveSuccess }) => {
   const [evaluatedTeamsMap, setEvaluatedTeamsMap] = useState({});
 
   // Current cohort object
-  const currentCohort = COHORTS.find(c => c.id === selectedCohortId) || COHORTS[0];
+  const currentCohort = COHORTS.find(c => c && c.id === selectedCohortId) || COHORTS[0];
 
-  // Refresh evaluated status when cohort or judge changes
+  // Calculate active judge name
   const activeJudge = judgeName === 'other' ? customJudgeName.trim() : judgeName;
 
+  // Refresh evaluated status when cohort or judge changes
   useEffect(() => {
     const evaluations = getEvaluations();
     const map = {};
-    evaluations.forEach(ev => {
-      if (ev.judgeName === activeJudge && ev.cohortId === selectedCohortId) {
-        map[ev.teamCode] = true;
-      }
-    });
+    if (Array.isArray(evaluations)) {
+      evaluations.forEach(ev => {
+        if (ev && ev.judgeName === activeJudge && ev.cohortId === selectedCohortId) {
+          map[ev.teamCode] = true;
+        }
+      });
+    }
     setEvaluatedTeamsMap(map);
 
     // Auto select first team if none selected
-    if (currentCohort.teams.length > 0 && !selectedTeamCode) {
+    if (currentCohort && Array.isArray(currentCohort.teams) && currentCohort.teams.length > 0 && !selectedTeamCode) {
       setSelectedTeamCode(currentCohort.teams[0].code);
     }
   }, [selectedCohortId, activeJudge]);
@@ -63,9 +66,9 @@ export const JudgeView = ({ onSaveSuccess }) => {
   useEffect(() => {
     if (!selectedTeamCode || !activeJudge) return;
     const evaluations = getEvaluations();
-    const existing = evaluations.find(
-      ev => ev.cohortId === selectedCohortId && ev.teamCode === selectedTeamCode && ev.judgeName === activeJudge
-    );
+    const existing = Array.isArray(evaluations)
+      ? evaluations.find(ev => ev && ev.cohortId === selectedCohortId && ev.teamCode === selectedTeamCode && ev.judgeName === activeJudge)
+      : null;
 
     if (existing) {
       setScores(existing.scores || {});
@@ -87,7 +90,6 @@ export const JudgeView = ({ onSaveSuccess }) => {
 
   const handleScoreChange = (categoryId, value) => {
     setScores(prev => ({ ...prev, [categoryId]: value }));
-    // Clear error for category
     if (errors[categoryId]) {
       setErrors(prev => ({ ...prev, [categoryId]: null }));
     }
@@ -147,7 +149,7 @@ export const JudgeView = ({ onSaveSuccess }) => {
 
   // Final Submit Handler
   const handleConfirmSubmit = () => {
-    const currentTeam = currentCohort.teams.find(t => t.code === selectedTeamCode);
+    const currentTeam = currentCohort?.teams?.find(t => t.code === selectedTeamCode);
     const evaluationRecord = {
       cohortId: selectedCohortId,
       teamId: currentTeam?.id || selectedTeamCode,
@@ -161,14 +163,19 @@ export const JudgeView = ({ onSaveSuccess }) => {
     saveEvaluation(evaluationRecord);
     setIsReviewOpen(false);
 
-    // Trigger celebratory confetti
-    confetti({
-      particleCount: 80,
-      spread: 70,
-      origin: { y: 0.6 }
-    });
+    // Trigger celebratory confetti safely
+    if (typeof confetti === 'function') {
+      try {
+        confetti({
+          particleCount: 80,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+      } catch (err) {
+        console.warn('Confetti error:', err);
+      }
+    }
 
-    // Refresh local evaluated map
     setEvaluatedTeamsMap(prev => ({ ...prev, [selectedTeamCode]: true }));
 
     if (onSaveSuccess) {
@@ -176,7 +183,7 @@ export const JudgeView = ({ onSaveSuccess }) => {
     }
   };
 
-  const currentTeamObj = currentCohort.teams.find(t => t.code === selectedTeamCode);
+  const currentTeamObj = currentCohort?.teams?.find(t => t.code === selectedTeamCode);
 
   return (
     <div className="max-w-6xl mx-auto space-y-8 pb-12">
@@ -275,12 +282,12 @@ export const JudgeView = ({ onSaveSuccess }) => {
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold text-slate-300 flex items-center gap-2">
               <Award className="w-4 h-4 text-amber-400" />
-              <span>เลือกทีมที่ต้องการประเมิน ({currentCohort.name}):</span>
+              <span>เลือกทีมที่ต้องการประเมิน ({currentCohort?.name || ''}):</span>
             </h2>
           </div>
 
           <div className="grid grid-cols-4 sm:grid-cols-8 md:grid-cols-8 lg:grid-cols-8 gap-2">
-            {currentCohort.teams.map((team) => {
+            {currentCohort?.teams?.map((team) => {
               const isSelected = selectedTeamCode === team.code;
               const isEvaluated = evaluatedTeamsMap[team.code];
 
@@ -420,7 +427,7 @@ export const JudgeView = ({ onSaveSuccess }) => {
           totalScore: roundedTotalScore,
           comment
         }}
-        cohortName={currentCohort.name}
+        cohortName={currentCohort?.name || ''}
         teamName={currentTeamObj?.name || selectedTeamCode}
       />
 

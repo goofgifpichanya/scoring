@@ -5,7 +5,9 @@ const STORAGE_KEY = 'scoring_system_evaluations_v1';
 export const getEvaluations = () => {
   try {
     const dataStr = localStorage.getItem(STORAGE_KEY);
-    return dataStr ? JSON.parse(dataStr) : [];
+    if (!dataStr) return [];
+    const parsed = JSON.parse(dataStr);
+    return Array.isArray(parsed) ? parsed : [];
   } catch (err) {
     console.error('Error reading evaluations from localStorage:', err);
     return [];
@@ -15,18 +17,17 @@ export const getEvaluations = () => {
 export const saveEvaluation = (evaluation) => {
   try {
     const evaluations = getEvaluations();
-    // Unique ID based on cohort, team, and judge
-    const recordId = evaluation.id || `eval_${evaluation.cohortId}_${evaluation.teamCode}_${evaluation.judgeName.trim()}`;
+    const recordId = evaluation.id || `eval_${evaluation.cohortId}_${evaluation.teamCode}_${(evaluation.judgeName || '').trim()}`;
     const timestamp = new Date().toISOString();
 
     const newRecord = {
       ...evaluation,
       id: recordId,
-      judgeName: evaluation.judgeName.trim(),
+      judgeName: (evaluation.judgeName || '').trim(),
       timestamp
     };
 
-    const existingIndex = evaluations.findIndex(item => item.id === recordId);
+    const existingIndex = evaluations.findIndex(item => item && item.id === recordId);
     let updatedEvaluations;
     if (existingIndex >= 0) {
       updatedEvaluations = [...evaluations];
@@ -46,7 +47,7 @@ export const saveEvaluation = (evaluation) => {
 export const deleteEvaluation = (id) => {
   try {
     const evaluations = getEvaluations();
-    const filtered = evaluations.filter(item => item.id !== id);
+    const filtered = evaluations.filter(item => item && item.id !== id);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
     return true;
   } catch (err) {
@@ -72,7 +73,6 @@ export const seedDemoData = () => {
 
   COHORTS.forEach((cohort) => {
     cohort.teams.forEach((team, teamIndex) => {
-      // Simulate 2-3 judges evaluating each team
       const judgeCount = Math.floor(Math.random() * 2) + 2; // 2 or 3 judges
       for (let j = 0; j < judgeCount; j++) {
         const judgeName = judges[j];
@@ -80,7 +80,6 @@ export const seedDemoData = () => {
         let totalScore = 0;
 
         EVALUATION_CATEGORIES.forEach((cat) => {
-          // Generate realistic scores (between 70% and 95% of max)
           const baseRatio = 0.72 + (Math.sin(teamIndex * 1.5 + j) * 0.18 + Math.random() * 0.1);
           const clampedRatio = Math.min(Math.max(baseRatio, 0.6), 1.0);
           const score = Math.round(clampedRatio * cat.maxScore * 10) / 10;
@@ -121,63 +120,64 @@ export const seedDemoData = () => {
 export const calculateTeamStats = (cohortId = 'all') => {
   const evaluations = getEvaluations();
 
-  // Get relevant cohorts
   const targetCohorts = cohortId === 'all' 
     ? COHORTS 
-    : COHORTS.filter(c => c.id === cohortId);
+    : COHORTS.filter(c => c && c.id === cohortId);
 
   const teamStatsMap = {};
 
-  // Initialize all teams
   targetCohorts.forEach(c => {
-    c.teams.forEach(t => {
-      const key = `${c.id}_${t.code}`;
-      teamStatsMap[key] = {
-        cohortId: c.id,
-        cohortName: c.name,
-        teamId: t.id,
-        teamCode: t.code,
-        teamName: t.name,
-        evaluationsCount: 0,
-        judgeNames: [],
-        categoryTotals: {},
-        categoryAverages: {},
-        totalScoreSum: 0,
-        averageTotalScore: 0,
-        comments: []
-      };
+    if (c && Array.isArray(c.teams)) {
+      c.teams.forEach(t => {
+        const key = `${c.id}_${t.code}`;
+        teamStatsMap[key] = {
+          cohortId: c.id,
+          cohortName: c.name,
+          teamId: t.id,
+          teamCode: t.code,
+          teamName: t.name,
+          evaluationsCount: 0,
+          judgeNames: [],
+          categoryTotals: {},
+          categoryAverages: {},
+          totalScoreSum: 0,
+          averageTotalScore: 0,
+          comments: []
+        };
 
-      EVALUATION_CATEGORIES.forEach(cat => {
-        teamStatsMap[key].categoryTotals[cat.id] = 0;
-        teamStatsMap[key].categoryAverages[cat.id] = 0;
-      });
-    });
-  });
-
-  // Aggregate evaluation scores
-  evaluations.forEach(evalRecord => {
-    const key = `${evalRecord.cohortId}_${evalRecord.teamCode}`;
-    if (teamStatsMap[key]) {
-      const teamStat = teamStatsMap[key];
-      teamStat.evaluationsCount += 1;
-      teamStat.judgeNames.push(evalRecord.judgeName);
-      teamStat.totalScoreSum += evalRecord.totalScore;
-
-      if (evalRecord.comment && evalRecord.comment.trim() !== '') {
-        teamStat.comments.push({
-          judgeName: evalRecord.judgeName,
-          text: evalRecord.comment
+        EVALUATION_CATEGORIES.forEach(cat => {
+          teamStatsMap[key].categoryTotals[cat.id] = 0;
+          teamStatsMap[key].categoryAverages[cat.id] = 0;
         });
-      }
-
-      EVALUATION_CATEGORIES.forEach(cat => {
-        const catScore = evalRecord.scores?.[cat.id] || 0;
-        teamStat.categoryTotals[cat.id] += catScore;
       });
     }
   });
 
-  // Calculate averages
+  if (Array.isArray(evaluations)) {
+    evaluations.forEach(evalRecord => {
+      if (!evalRecord) return;
+      const key = `${evalRecord.cohortId}_${evalRecord.teamCode}`;
+      if (teamStatsMap[key]) {
+        const teamStat = teamStatsMap[key];
+        teamStat.evaluationsCount += 1;
+        if (evalRecord.judgeName) teamStat.judgeNames.push(evalRecord.judgeName);
+        teamStat.totalScoreSum += (evalRecord.totalScore || 0);
+
+        if (evalRecord.comment && evalRecord.comment.trim() !== '') {
+          teamStat.comments.push({
+            judgeName: evalRecord.judgeName || 'ไม่ระบุชื่อ',
+            text: evalRecord.comment
+          });
+        }
+
+        EVALUATION_CATEGORIES.forEach(cat => {
+          const catScore = evalRecord.scores?.[cat.id] || 0;
+          teamStat.categoryTotals[cat.id] += catScore;
+        });
+      }
+    });
+  }
+
   const teamStatsList = Object.values(teamStatsMap).map(stat => {
     if (stat.evaluationsCount > 0) {
       stat.averageTotalScore = Math.round((stat.totalScoreSum / stat.evaluationsCount) * 10) / 10;
@@ -188,10 +188,8 @@ export const calculateTeamStats = (cohortId = 'all') => {
     return stat;
   });
 
-  // Sort by averageTotalScore descending
   teamStatsList.sort((a, b) => b.averageTotalScore - a.averageTotalScore);
 
-  // Assign rank
   let currentRank = 1;
   teamStatsList.forEach((stat, idx) => {
     if (idx > 0 && stat.averageTotalScore < teamStatsList[idx - 1].averageTotalScore) {
@@ -206,7 +204,7 @@ export const calculateTeamStats = (cohortId = 'all') => {
 // Export to CSV helper
 export const exportToCSV = () => {
   const evaluations = getEvaluations();
-  if (evaluations.length === 0) {
+  if (!Array.isArray(evaluations) || evaluations.length === 0) {
     alert('ยังไม่มีข้อมูลการลงคะแนนให้ส่งออก');
     return;
   }
@@ -227,19 +225,20 @@ export const exportToCSV = () => {
   ];
 
   const rows = evaluations.map(item => {
+    if (!item) return [];
     const cohortName = item.cohortId === 'cohort_1' ? 'รุ่นที่ 1' : 'รุ่นที่ 2';
-    const dateStr = new Date(item.timestamp).toLocaleString('th-TH');
+    const dateStr = item.timestamp ? new Date(item.timestamp).toLocaleString('th-TH') : '-';
     return [
       `"${cohortName}"`,
-      `"${item.teamCode}"`,
-      `"${item.judgeName}"`,
+      `"${item.teamCode || ''}"`,
+      `"${item.judgeName || ''}"`,
       item.scores?.data_quality || 0,
       item.scores?.analysis_insight || 0,
       item.scores?.report_dashboard || 0,
       item.scores?.power_bi || 0,
       item.scores?.presentation || 0,
       item.scores?.creativity_practical || 0,
-      item.totalScore,
+      item.totalScore || 0,
       `"${(item.comment || '').replace(/"/g, '""')}"`,
       `"${dateStr}"`
     ];
