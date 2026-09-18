@@ -13,7 +13,8 @@ import {
   RotateCcw, 
   Award,
   Sparkles,
-  Info
+  Info,
+  MessageSquare
 } from 'lucide-react';
 
 export const JudgeView = ({ onSaveSuccess }) => {

@@ -3,523 +3,1004 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบลงคะแนนประเมินผลการอบรม (Scoring System)</title>
-  
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <!-- React & React-DOM -->
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-  <!-- Babel -->
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <!-- Canvas Confetti -->
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-
+  <title>ระบบลงคะแนนประเมินผลการอบรม</title>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: 'Prompt', sans-serif;
-      background-color: #0f172a;
-      color: #f8fafc;
-      background-image: 
-        radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
-        radial-gradient(at 100% 0%, rgba(147, 51, 234, 0.15) 0px, transparent 50%),
-        radial-gradient(at 50% 100%, rgba(16, 185, 129, 0.1) 0px, transparent 50%);
-      background-attachment: fixed;
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Prompt',sans-serif;}
+
+    body{
+      min-height:100vh;
+      background:#f5f7ff;
+      background-image:
+        radial-gradient(ellipse at 0% 0%,rgba(99,102,241,.12) 0,transparent 50%),
+        radial-gradient(ellipse at 100% 0%,rgba(168,85,247,.10) 0,transparent 50%),
+        radial-gradient(ellipse at 50% 100%,rgba(16,185,129,.08) 0,transparent 55%);
+      background-attachment:fixed;
+      color:#1e293b;
     }
-    .glass-panel {
-      background: rgba(30, 41, 59, 0.75);
-      backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+
+    /* ===== Scrollbar ===== */
+    ::-webkit-scrollbar{width:6px;height:6px}
+    ::-webkit-scrollbar-track{background:#f1f5f9}
+    ::-webkit-scrollbar-thumb{background:rgba(99,102,241,.3);border-radius:4px}
+
+    /* ===== CARDS ===== */
+    .card{background:#fff;border:1px solid rgba(99,102,241,.1);border-radius:22px;box-shadow:0 4px 24px rgba(99,102,241,.07),0 1px 3px rgba(0,0,0,.04);}
+    .card2{background:rgba(248,250,255,.9);border:1px solid rgba(99,102,241,.09);border-radius:16px;}
+    .card-blue{background:linear-gradient(135deg,#eff6ff,#f5f3ff);border:1px solid rgba(99,102,241,.15);border-radius:22px;}
+    .card-purple{background:linear-gradient(135deg,#faf5ff,#fdf4ff);border:1px solid rgba(139,92,246,.15);border-radius:22px;}
+
+    /* ===== GRADIENT TEXT ===== */
+    .grad{background:linear-gradient(135deg,#4f46e5,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+
+    /* ===== BUTTONS ===== */
+    .btn{border:none;cursor:pointer;font-family:'Prompt',sans-serif;font-weight:700;border-radius:14px;transition:all .22s;display:inline-flex;align-items:center;gap:8px;}
+    .btn-primary{background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;padding:13px 28px;font-size:15px;box-shadow:0 4px 18px rgba(79,70,229,.35);}
+    .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(79,70,229,.45);}
+    .btn-judge{background:linear-gradient(135deg,#2563eb,#4f46e5);color:#fff;padding:14px 28px;font-size:15px;box-shadow:0 4px 18px rgba(37,99,235,.3);}
+    .btn-judge:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(37,99,235,.45);}
+    .btn-admin{background:linear-gradient(135deg,#7c3aed,#db2777);color:#fff;padding:14px 28px;font-size:15px;box-shadow:0 4px 18px rgba(124,58,237,.3);}
+    .btn-admin:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(124,58,237,.45);}
+    .btn-green{background:linear-gradient(135deg,#059669,#10b981);color:#fff;padding:11px 24px;font-size:14px;box-shadow:0 4px 14px rgba(5,150,105,.3);}
+    .btn-green:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(5,150,105,.4);}
+    .btn-outline{background:#fff;color:#64748b;border:1.5px solid #e2e8f0;padding:11px 22px;font-size:14px;border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,.04);}
+    .btn-outline:hover{border-color:#6366f1;color:#4f46e5;background:#fafafe;}
+    .btn-teal{background:linear-gradient(135deg,#0d9488,#0891b2);color:#fff;padding:10px 20px;font-size:13px;border-radius:12px;box-shadow:0 3px 12px rgba(13,148,136,.3);}
+    .btn-teal:hover{transform:translateY(-1px);box-shadow:0 5px 16px rgba(13,148,136,.4);}
+    .btn-sm{background:rgba(99,102,241,.09);color:#4f46e5;border:none;padding:8px 16px;font-size:12px;border-radius:10px;cursor:pointer;font-family:'Prompt',sans-serif;font-weight:700;transition:all .2s;}
+    .btn-sm:hover{background:rgba(99,102,241,.16);}
+
+    /* ===== INPUTS ===== */
+    .inp{background:#fff;border:1.5px solid #e2e8f0;color:#1e293b;border-radius:14px;padding:12px 16px;width:100%;font-size:15px;font-family:'Prompt',sans-serif;transition:all .2s;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+    .inp:focus{outline:none;border-color:#6366f1;box-shadow:0 0 0 4px rgba(99,102,241,.1);}
+    .inp.err{border-color:#ef4444;box-shadow:0 0 0 4px rgba(239,68,68,.1);}
+    .inp::placeholder{color:#94a3b8;}
+    .select-inp{background:#fff;border:1.5px solid #e2e8f0;color:#1e293b;border-radius:14px;padding:12px 16px;width:100%;font-size:14px;font-weight:600;font-family:'Prompt',sans-serif;cursor:pointer;transition:all .2s;appearance:auto;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+    .select-inp:focus{outline:none;border-color:#6366f1;box-shadow:0 0 0 4px rgba(99,102,241,.1);}
+    .ta{background:#fff;border:1.5px solid #e2e8f0;color:#1e293b;border-radius:14px;padding:12px 16px;width:100%;font-family:'Prompt',sans-serif;font-size:14px;resize:vertical;transition:all .2s;}
+    .ta:focus{outline:none;border-color:#7c3aed;box-shadow:0 0 0 4px rgba(124,58,237,.1);}
+    .ta::placeholder{color:#94a3b8;}
+
+    /* ===== SCORE INPUT ===== */
+    .score-inp{background:#fafbff;border:2px solid #e0e7ff;color:#1e293b;text-align:center;font-size:26px;font-weight:900;width:100%;padding:12px 8px;border-radius:14px;transition:all .2s;font-family:'Prompt',sans-serif;-moz-appearance:textfield;appearance:textfield;box-shadow:inset 0 1px 3px rgba(99,102,241,.06);}
+    .score-inp::-webkit-outer-spin-button,.score-inp::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+    .score-inp:focus{outline:none;border-color:#6366f1;box-shadow:0 0 0 4px rgba(99,102,241,.12);background:#fff;}
+    .score-inp.err{border-color:#ef4444;background:#fff5f5;box-shadow:0 0 0 4px rgba(239,68,68,.1);}
+    .score-inp-locked{background:#f8fafc;border:2px solid #f1f5f9;color:#94a3b8;text-align:center;font-size:26px;font-weight:900;width:100%;padding:12px 8px;border-radius:14px;font-family:'Prompt',sans-serif;cursor:not-allowed;-moz-appearance:textfield;appearance:textfield;}
+    .score-inp-locked::-webkit-outer-spin-button,.score-inp-locked::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+
+    /* ===== NAV ===== */
+    .nav{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.9);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(99,102,241,.1);box-shadow:0 2px 20px rgba(99,102,241,.08);}
+
+    /* ===== TEAM BUTTONS ===== */
+    .team-btn{padding:10px 6px;border-radius:12px;border:2px solid;cursor:pointer;text-align:center;font-weight:700;font-size:12px;transition:all .22s;font-family:'Prompt',sans-serif;}
+    .t-sel{border-color:#6366f1;background:linear-gradient(135deg,#eef2ff,#f5f3ff);color:#4338ca;transform:scale(1.08);box-shadow:0 4px 16px rgba(99,102,241,.25);}
+    .t-done{border-color:#10b981;background:#ecfdf5;color:#059669;}
+    .t-done:hover{border-color:#059669;}
+    .t-idle{border-color:#e2e8f0;background:#fff;color:#94a3b8;}
+    .t-idle:hover{border-color:#a5b4fc;color:#6366f1;background:#eef2ff;}
+
+    /* ===== COHORT BUTTONS ===== */
+    .coh-btn{padding:10px 24px;border-radius:14px;border:none;cursor:pointer;font-weight:700;font-size:14px;transition:all .22s;font-family:'Prompt',sans-serif;}
+    .coh-act{background:linear-gradient(135deg,#2563eb,#4f46e5);color:#fff;box-shadow:0 4px 14px rgba(37,99,235,.3);}
+    .coh-ina{background:#fff;color:#94a3b8;border:1.5px solid #e2e8f0;}
+    .coh-ina:hover{border-color:#a5b4fc;color:#6366f1;background:#fafafe;}
+
+    /* ===== CATEGORY CARD ===== */
+    .cat-card{background:#fff;border:2px solid #f1f5f9;border-radius:18px;padding:20px;transition:all .22s;box-shadow:0 2px 12px rgba(0,0,0,.04);}
+    .cat-card:hover{box-shadow:0 6px 24px rgba(99,102,241,.1);}
+    .cat-card.err-card{border-color:#fca5a5!important;background:#fff5f5;}
+    .cat-card-locked{background:#f8fafc;border:2px solid #f1f5f9;border-radius:18px;padding:20px;}
+
+    /* ===== PROGRESS ===== */
+    .prog-bg{background:#f1f5f9;border-radius:999px;height:7px;overflow:hidden;}
+
+    /* ===== ROLE CARD ===== */
+    .role-card{border-radius:20px;padding:22px;cursor:pointer;border:2px solid;transition:all .28s;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.05);}
+    .role-card:hover{transform:translateY(-3px);}
+    .role-judge{border-color:#bfdbfe;}
+    .role-judge:hover{border-color:#2563eb;box-shadow:0 8px 32px rgba(37,99,235,.15);}
+    .role-admin{border-color:#ddd6fe;}
+    .role-admin:hover{border-color:#7c3aed;box-shadow:0 8px 32px rgba(124,58,237,.15);}
+
+    /* ===== MODAL ===== */
+    .modal-ov{position:fixed;inset:0;z-index:100;background:rgba(30,41,59,.4);backdrop-filter:blur(14px);display:flex;align-items:center;justify-content:center;padding:16px;animation:fadeIn .2s ease;}
+    .modal-box{background:#fff;border:1px solid rgba(99,102,241,.15);border-radius:26px;padding:32px;max-width:540px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(30,41,59,.2);animation:slideUp .25s ease;}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+    /* ===== ADMIN FILTER ===== */
+    .af-btn{padding:9px 20px;border-radius:12px;border:none;cursor:pointer;font-weight:700;font-size:13px;transition:all .2s;font-family:'Prompt',sans-serif;}
+    .af-act{background:linear-gradient(135deg,#7c3aed,#db2777);color:#fff;box-shadow:0 4px 14px rgba(124,58,237,.3);}
+    .af-ina{background:#fff;color:#94a3b8;border:1.5px solid #e2e8f0;}
+    .af-ina:hover{border-color:#a5b4fc;color:#6366f1;}
+
+    /* ===== BADGES ===== */
+    .badge-blue{background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;padding:5px 14px;border-radius:20px;font-size:12px;font-weight:700;}
+    .badge-purple{background:#f5f3ff;color:#7c3aed;border:1px solid #ddd6fe;padding:5px 14px;border-radius:20px;font-size:12px;font-weight:700;}
+    .badge-judge{background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:700;}
+    .badge-admin{background:#f5f3ff;color:#7c3aed;border:1px solid #ddd6fe;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:700;}
+    .badge-logout{background:#fff1f2;color:#e11d48;border:1.5px solid #fecdd3;padding:7px 16px;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Prompt',sans-serif;transition:all .2s;}
+    .badge-logout:hover{background:#ffe4e6;}
+    .badge-teal{background:#f0fdfa;color:#0d9488;border:1px solid #99f6e4;padding:5px 14px;border-radius:20px;font-size:12px;font-weight:700;}
+
+    /* ===== STAT CARD ===== */
+    .stat-card{border-radius:18px;padding:20px;border:1px solid;}
+
+    /* ===== TABLE ===== */
+    .tbl-row:hover td{background:#fafafe!important;}
+
+    /* ===== TOAST ===== */
+    .toast{position:fixed;top:80px;right:20px;z-index:200;background:#fff;border:1px solid rgba(16,185,129,.3);border-radius:16px;padding:14px 20px;box-shadow:0 8px 32px rgba(16,185,129,.15);display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;color:#065f46;animation:slideLeft .3s ease;}
+    @keyframes slideLeft{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+
+    input[type=number]::-webkit-outer-spin-button,
+    input[type=number]::-webkit-inner-spin-button {
+      -webkit-appearance: none !important;
+      margin: 0 !important;
     }
-    .glass-card {
-      background: rgba(15, 23, 42, 0.6);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-    }
-    .glass-input {
-      background: rgba(15, 23, 42, 0.8);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: #f8fafc;
-    }
-    .glass-input:focus {
-      outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+    input[type=number] {
+      -moz-appearance: textfield !important;
+      appearance: textfield !important;
     }
   </style>
 </head>
 <body>
-  <div id="root"></div>
+<div id="app"></div>
+<div id="toast-container"></div>
 
-  <script type="text/babel">
-    const { useState, useEffect } = React;
+<script>
+// ========================== DATA ==========================
+const CATEGORIES = [
+  {id:'data_quality', title:'ข้อมูลและคุณภาพ',       max:15, color:'#2563eb', bg:'#eff6ff', border:'#bfdbfe', bar:'#3b82f6'},
+  {id:'analysis',     title:'Analysis & Insight',     max:20, color:'#7c3aed', bg:'#f5f3ff', border:'#ddd6fe', bar:'#8b5cf6'},
+  {id:'report',       title:'Report / Dashboard',     max:20, color:'#059669', bg:'#ecfdf5', border:'#a7f3d0', bar:'#10b981'},
+  {id:'power_bi',     title:'Power BI',               max:15, color:'#d97706', bg:'#fffbeb', border:'#fde68a', bar:'#f59e0b'},
+  {id:'presentation', title:'Presentation',           max:15, color:'#e11d48', bg:'#fff1f2', border:'#fecdd3', bar:'#f43f5e'},
+  {id:'creativity',   title:'Creativity & Practical', max:15, color:'#7c3aed', bg:'#fdf4ff', border:'#e9d5ff', bar:'#a855f7'}
+];
 
-    // Constants
-    const EVALUATION_CATEGORIES = [
-      { id: 'data_quality', title: 'ข้อมูลและคุณภาพ', titleEn: 'Data & Quality', maxScore: 15, color: 'from-blue-500 to-cyan-500', icon: 'database' },
-      { id: 'analysis_insight', title: 'Analysis & Insight', titleEn: 'Analysis & Insight', maxScore: 20, color: 'from-purple-500 to-indigo-500', icon: 'brain' },
-      { id: 'report_dashboard', title: 'Report / Dashboard', titleEn: 'Report / Dashboard', maxScore: 20, color: 'from-emerald-500 to-teal-500', icon: 'layout' },
-      { id: 'power_bi', title: 'Power BI', titleEn: 'Power BI Technical', maxScore: 15, color: 'from-amber-500 to-orange-500', icon: 'bar-chart-3' },
-      { id: 'presentation', title: 'Presentation', titleEn: 'Presentation & Storytelling', maxScore: 15, color: 'from-rose-500 to-pink-500', icon: 'mic' },
-      { id: 'creativity_practical', title: 'Creativity & Practical Use', titleEn: 'Creativity & Value', maxScore: 15, color: 'from-violet-500 to-fuchsia-500', icon: 'sparkles' }
-    ];
+const COHORTS = [
+  {id:'c1', name:'รุ่นที่ 1', teams:['บส.','สป.','ลอ.','ตส.','สง.','อส.','พล.','จท.','ตท.','สบ.','ธญ.','นร.','บน1.','บน2.','พธ.','สส.']},
+  {id:'c2', name:'รุ่นที่ 2', teams:['กค.','บช.','บอ.','งฝ.','บง.','ทน.','อก.','สว.','กก.','รส.','ผท.','งส.','ธต.','LPS','ธง.']}
+];
 
-    const TOTAL_MAX_SCORE = 100;
+const ADMIN_PASS = "DA123456";
+const SK = 'scoring_v5';
 
-    const COHORTS = [
-      {
-        id: 'cohort_1',
-        name: 'รุ่นที่ 1',
-        teamCount: 16,
-        teams: ['บส.', 'สป.', 'ลอ.', 'ตส.', 'สง.', 'อส.', 'พล.', 'จท.', 'ตท.', 'สบ.', 'ธญ.', 'นร.', 'บน1.', 'บน2.', 'พธ.', 'สส.']
-      },
-      {
-        id: 'cohort_2',
-        name: 'รุ่นที่ 2',
-        teamCount: 15,
-        teams: ['กค.', 'บช.', 'บอ.', 'งฝ.', 'บง.', 'ทน.', 'อก.', 'สว.', 'กก.', 'รส.', 'ผท.', 'งส.', 'ธต.', 'LPS', 'ธง.']
+function getAll(){
+  try{
+    const d=JSON.parse(localStorage.getItem(SK)||'[]');
+    if(!Array.isArray(d)) return [];
+    return d.map(r=>{
+      const sc={};
+      if(r.scores){
+        Object.keys(r.scores).forEach(k=>{
+          sc[k]=parseFloat(r.scores[k])||0;
+        });
       }
-    ];
-
-    const STORAGE_KEY = 'scoring_system_standalone_v1';
-
-    const getEvaluations = () => {
-      try {
-        const str = localStorage.getItem(STORAGE_KEY);
-        const data = str ? JSON.parse(str) : [];
-        return Array.isArray(data) ? data : [];
-      } catch (e) {
-        return [];
-      }
-    };
-
-    const saveEvaluation = (record) => {
-      const list = getEvaluations();
-      const recordId = `eval_${record.cohortId}_${record.teamCode}_${record.judgeName.trim()}`;
-      const newRecord = { ...record, id: recordId, timestamp: new Date().toISOString() };
-      const idx = list.findIndex(item => item.id === recordId);
-      if (idx >= 0) list[idx] = newRecord;
-      else list.push(newRecord);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-      return newRecord;
-    };
-
-    function App() {
-      const [activeTab, setActiveTab] = useState('judge'); // 'judge' | 'admin'
-      const [selectedCohortId, setSelectedCohortId] = useState('cohort_1');
-      const [selectedTeamCode, setSelectedTeamCode] = useState('บส.');
-      const [judgeName, setJudgeName] = useState('กรรมการ 1');
-      const [scores, setScores] = useState({ data_quality: '', analysis_insight: '', report_dashboard: '', power_bi: '', presentation: '', creativity_practical: '' });
-      const [comment, setComment] = useState('');
-      const [isReviewOpen, setIsReviewOpen] = useState(false);
-      const [evaluatedMap, setEvaluatedMap] = useState({});
-      const [evaluations, setEvaluations] = useState([]);
-
-      const currentCohort = COHORTS.find(c => c.id === selectedCohortId) || COHORTS[0];
-
-      const refreshData = () => {
-        const evs = getEvaluations();
-        setEvaluations(evs);
-        const map = {};
-        evs.forEach(item => {
-          if (item.judgeName === judgeName && item.cohortId === selectedCohortId) {
-            map[item.teamCode] = true;
-          }
-        });
-        setEvaluatedMap(map);
+      return {
+        ...r,
+        total: parseFloat(r.total)||0,
+        scores: sc
       };
+    });
+  }catch{return [];}
+}
+function saveRec(r){
+  const all=getAll();
+  const cleanScores = {};
+  if(r.scores){
+    Object.keys(r.scores).forEach(k=>{
+      cleanScores[k] = parseFloat(r.scores[k])||0;
+    });
+  }
+  const cleanTotal = parseFloat(r.total)||0;
+  const id=`${r.cohortId}__${r.teamCode}__${r.judge}`;
+  const rec={...r, scores:cleanScores, total:cleanTotal, id, savedAt:new Date().toISOString()};
+  const i=all.findIndex(x=>x.id===id);
+  if(i>=0) all[i]=rec; else all.push(rec);
+  localStorage.setItem(SK,JSON.stringify(all));
+}
+function clearAll(){localStorage.removeItem(SK);}
 
-      useEffect(() => {
-        refreshData();
-      }, [selectedCohortId, judgeName, activeTab]);
+let S = {
+  screen:'login', loginMode:'', loginPass:'', loginPassErr:false,
+  judgeName:'กรรมการ 1', cohortId:'c1', teamCode:'บส.',
+  scores:{}, comment:'', errors:{}, showModal:false, adminCohort:'all', selectedTeam:null,
+};
 
-      useEffect(() => {
-        const evs = getEvaluations();
-        const existing = evs.find(item => item.cohortId === selectedCohortId && item.teamCode === selectedTeamCode && item.judgeName === judgeName);
-        if (existing) {
-          setScores(existing.scores || {});
-          setComment(existing.comment || '');
-        } else {
-          setScores({ data_quality: '', analysis_insight: '', report_dashboard: '', power_bi: '', presentation: '', creativity_practical: '' });
-          setComment('');
-        }
-      }, [selectedTeamCode, selectedCohortId, judgeName]);
+function set(p){S={...S,...p};render();}
 
-      useEffect(() => {
-        setTimeout(() => { if (window.lucide) window.lucide.createIcons(); }, 100);
-      }, [activeTab, selectedCohortId, selectedTeamCode, isReviewOpen]);
+function total(sc){return Math.round(CATEGORIES.reduce((s,c)=>s+(parseFloat(sc[c.id])||0),0)*10)/10;}
+function evaluatedByJudge(cohortId,judge){
+  const s=new Set();getAll().forEach(r=>{if(r.cohortId===cohortId&&r.judge===judge)s.add(r.teamCode);});return s;
+}
+function loadScore(cohortId,teamCode,judge){return getAll().find(r=>r.cohortId===cohortId&&r.teamCode===teamCode&&r.judge===judge)||null;}
+function buildBoard(cohortFilter){
+  const all=getAll();
+  const cohorts=cohortFilter==='all'?COHORTS:COHORTS.filter(c=>c.id===cohortFilter);
+  const map={};
+  cohorts.forEach(c=>c.teams.forEach(t=>{
+    const k=c.id+'_'+t;
+    map[k]={cohort:c.name,team:t,count:0,sum:0,catSums:{}};
+    CATEGORIES.forEach(cat=>map[k].catSums[cat.id]=0);
+  }));
+  all.forEach(r=>{
+    const k=r.cohortId+'_'+r.teamCode;
+    if(!map[k])return;
+    map[k].count++;map[k].sum+=(r.total||0);
+    CATEGORIES.forEach(cat=>map[k].catSums[cat.id]+=(r.scores?.[cat.id]||0));
+  });
+  const list=Object.values(map).map(m=>{
+    m.avg=m.count>0?Math.round(m.sum/m.count*10)/10:0;
+    if(m.count>0){m.catAvgs={};CATEGORIES.forEach(cat=>m.catAvgs[cat.id]=Math.round(m.catSums[cat.id]/m.count*10)/10);}
+    return m;
+  });
+  list.sort((a,b)=>b.avg-a.avg);
+  let rank=1;
+  list.forEach((item,i)=>{
+    if(i>0&&item.avg<list[i-1].avg)rank=i+1;
+    item.rank=item.count>0?rank:null;
+  });
+  return list;
+}
 
-      const handleScoreChange = (catId, val) => {
-        setScores(prev => ({ ...prev, [catId]: val }));
-      };
+function showToast(msg){
+  const tc=document.getElementById('toast-container');
+  if(!tc)return;
+  tc.innerHTML=`<div class="toast">✅ ${msg}</div>`;
+  setTimeout(()=>{if(tc)tc.innerHTML='';},3500);
+}
 
-      const totalScore = Object.values(scores).reduce((sum, val) => {
-        const n = parseFloat(val);
-        return sum + (isNaN(n) ? 0 : n);
-      }, 0);
+// ========================== LOGIN ==========================
+function renderLogin(){
+  const isJudge=S.loginMode==='judge', isAdmin=S.loginMode==='admin';
+  return `
+  <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;">
+    <div style="max-width:460px;width:100%;">
 
-      const roundedTotal = Math.round(totalScore * 10) / 10;
+      <div style="text-align:center;margin-bottom:40px;">
+        <div style="width:78px;height:78px;border-radius:24px;
+          background:linear-gradient(135deg,#4f46e5,#7c3aed);
+          display:flex;align-items:center;justify-content:center;font-size:36px;
+          margin:0 auto 16px;
+          box-shadow:0 8px 36px rgba(79,70,229,.4);">🏆</div>
+        <h1 style="font-size:27px;font-weight:900;margin:0;background:linear-gradient(135deg,#4f46e5,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">SCORING SYSTEM</h1>
+        <p style="color:#94a3b8;font-size:14px;margin-top:8px;">ระบบประเมินผลการอบรม 2 รุ่น · 31 ทีม</p>
+      </div>
 
-      const handleOpenReview = () => {
-        for (let cat of EVALUATION_CATEGORIES) {
-          const val = scores[cat.id];
-          if (val === '' || val === undefined) {
-            alert(`โปรดกรอกคะแนนในหมวด ${cat.title}`);
-            return;
-          }
-          const num = Number(val);
-          if (isNaN(num) || num < 0 || num > cat.maxScore) {
-            alert(`คะแนนหมวด ${cat.title} ต้องอยู่ระหว่าง 0 - ${cat.maxScore} คะแนน`);
-            return;
-          }
-        }
-        setIsReviewOpen(true);
-      };
-
-      const handleConfirmSubmit = () => {
-        saveEvaluation({
-          cohortId: selectedCohortId,
-          teamCode: selectedTeamCode,
-          judgeName,
-          scores,
-          totalScore: roundedTotal,
-          comment
-        });
-        setIsReviewOpen(false);
-        if (window.confetti) confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
-        refreshData();
-        alert(`บันทึกคะแนนทีม ${selectedTeamCode} เรียบร้อยแล้ว!`);
-      };
-
-      const seedDemo = () => {
-        if (!confirm('ต้องการสร้างข้อมูลคะแนนจำลองทดสอบใช่หรือไม่?')) return;
-        const judges = ['กรรมการ 1', 'กรรมการ 2', 'กรรมการ 3'];
-        const list = [];
-        COHORTS.forEach(c => {
-          c.teams.forEach(t => {
-            judges.forEach(j => {
-              const sc = {};
-              let tot = 0;
-              EVALUATION_CATEGORIES.forEach(cat => {
-                const ratio = 0.7 + Math.random() * 0.25;
-                sc[cat.id] = Math.round(ratio * cat.maxScore * 10) / 10;
-                tot += sc[cat.id];
-              });
-              list.push({
-                id: `eval_${c.id}_${t}_${j}`,
-                cohortId: c.id,
-                teamCode: t,
-                judgeName: j,
-                scores: sc,
-                totalScore: Math.round(tot * 10) / 10,
-                comment: 'ผลงานทำได้สวยงามและครบถ้วนมาก',
-                timestamp: new Date().toISOString()
-              });
-            });
-          });
-        });
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-        refreshData();
-      };
-
-      // Leaderboard Calculation
-      const calculateLeaderboard = (cohortFilter) => {
-        const statsMap = {};
-        const targetCohorts = cohortFilter === 'all' ? COHORTS : COHORTS.filter(c => c.id === cohortFilter);
-        
-        targetCohorts.forEach(c => {
-          c.teams.forEach(t => {
-            const key = `${c.id}_${t}`;
-            statsMap[key] = { cohortName: c.name, teamCode: t, count: 0, sum: 0, avg: 0, categorySums: {}, categoryAvgs: {} };
-            EVALUATION_CATEGORIES.forEach(cat => statsMap[key].categorySums[cat.id] = 0);
-          });
-        });
-
-        evaluations.forEach(item => {
-          const key = `${item.cohortId}_${item.teamCode}`;
-          if (statsMap[key]) {
-            statsMap[key].count += 1;
-            statsMap[key].sum += item.totalScore;
-            EVALUATION_CATEGORIES.forEach(cat => {
-              statsMap[key].categorySums[cat.id] += (item.scores?.[cat.id] || 0);
-            });
-          }
-        });
-
-        const list = Object.values(statsMap).map(s => {
-          if (s.count > 0) {
-            s.avg = Math.round((s.sum / s.count) * 10) / 10;
-            EVALUATION_CATEGORIES.forEach(cat => {
-              s.categoryAvgs[cat.id] = Math.round((s.categorySums[cat.id] / s.count) * 10) / 10;
-            });
-          }
-          return s;
-        });
-
-        list.sort((a, b) => b.avg - a.avg);
-        let rank = 1;
-        list.forEach((s, idx) => {
-          if (idx > 0 && s.avg < list[idx - 1].avg) rank = idx + 1;
-          s.rank = s.count > 0 ? rank : '-';
-        });
-        return list;
-      };
-
-      const [adminCohortFilter, setAdminCohortFilter] = useState('all');
-      const leaderboard = calculateLeaderboard(adminCohortFilter);
-
-      return (
-        <div className="min-h-screen pb-12">
-          {/* Navbar */}
-          <header className="sticky top-0 z-40 glass-panel border-b border-slate-800">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-20">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 to-purple-600 flex items-center justify-center font-bold text-white text-xl">🏆</div>
-                <div>
-                  <h1 className="font-extrabold text-lg text-white">SCORING SYSTEM</h1>
-                  <p className="text-xs text-slate-400">ระบบประเมินและสรุปผลคะแนน 2 รุ่นอบรม (31 ทีม)</p>
-                </div>
+      <div class="card" style="padding:32px;">
+        ${!S.loginMode ? `
+        <h2 style="font-size:17px;font-weight:800;color:#1e293b;text-align:center;margin-bottom:6px;">เลือกบทบาทของคุณ</h2>
+        <p style="color:#94a3b8;font-size:13px;text-align:center;margin-bottom:24px;">เพื่อเข้าสู่ระบบที่เหมาะสม</p>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div class="role-card role-judge" onclick="set({loginMode:'judge'})">
+            <div style="display:flex;align-items:center;gap:16px;">
+              <div style="width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,#dbeafe,#eff6ff);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;">🧑‍⚖️</div>
+              <div>
+                <div style="font-size:16px;font-weight:800;color:#1d4ed8;margin-bottom:3px;">กรรมการผู้ประเมิน</div>
+                <div style="font-size:13px;color:#64748b;">เข้าสู่หน้าลงคะแนนประเมินผลทีม</div>
               </div>
-
-              <div className="flex gap-2 bg-slate-950 p-1.5 rounded-2xl border border-slate-800">
-                <button 
-                  onClick={() => setActiveTab('judge')}
-                  className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${activeTab === 'judge' ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}
-                >
-                  📝 หน้ากรรมการลงคะแนน
-                </button>
-                <button 
-                  onClick={() => setActiveTab('admin')}
-                  className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${activeTab === 'admin' ? 'bg-purple-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}
-                >
-                  📊 หลังบ้าน / Admin Dashboard
-                </button>
-              </div>
+              <div style="margin-left:auto;color:#93c5fd;font-size:22px;font-weight:300;">›</div>
             </div>
-          </header>
-
-          <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            {activeTab === 'judge' ? (
-              <div className="space-y-8">
-                {/* Header card */}
-                <div className="glass-panel rounded-3xl p-6 border border-slate-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                  <div>
-                    <span className="text-xs font-semibold text-blue-400 bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">
-                      แบบประเมินกรรมการ (Judge Evaluation)
-                    </span>
-                    <h2 className="text-2xl font-bold text-white mt-2">กรอกคะแนนและประเมินผลงาน</h2>
-                  </div>
-
-                  <div className="glass-card p-3 rounded-xl border border-slate-700">
-                    <label className="text-xs text-slate-300 font-semibold block mb-1">กรรมการผู้ประเมิน:</label>
-                    <select 
-                      value={judgeName} 
-                      onChange={e => setJudgeName(e.target.value)}
-                      className="bg-slate-900 text-white text-sm font-semibold py-1.5 px-3 rounded-lg border border-slate-700"
-                    >
-                      <option value="กรรมการ 1">กรรมการ 1</option>
-                      <option value="กรรมการ 2">กรรมการ 2</option>
-                      <option value="กรรมการ 3">กรรมการ 3</option>
-                      <option value="กรรมการ 4">กรรมการ 4</option>
-                      <option value="กรรมการ 5">กรรมการ 5</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* Cohort & Teams */}
-                <div className="space-y-4">
-                  <div className="flex gap-2">
-                    {COHORTS.map(c => (
-                      <button
-                        key={c.id}
-                        onClick={() => { setSelectedCohortId(c.id); setSelectedTeamCode(c.teams[0]); }}
-                        className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all ${selectedCohortId === c.id ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg' : 'bg-slate-900 text-slate-400 hover:text-white'}`}
-                      >
-                        {c.name} ({c.teamCount} ทีม)
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* Team Grid */}
-                  <div className="glass-panel p-5 rounded-2xl border border-slate-800 space-y-2">
-                    <p className="text-xs font-semibold text-slate-400">เลือกทีมที่ต้องการประเมิน ({currentCohort.name}):</p>
-                    <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
-                      {currentCohort.teams.map(tCode => {
-                        const isSelected = selectedTeamCode === tCode;
-                        const isDone = evaluatedMap[tCode];
-                        return (
-                          <button
-                            key={tCode}
-                            onClick={() => setSelectedTeamCode(tCode)}
-                            className={`py-2.5 px-2 rounded-xl text-center font-bold text-xs transition-all relative border ${isSelected ? 'bg-amber-500/20 border-amber-400 text-amber-300 scale-105' : isDone ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-300' : 'bg-slate-900 border-slate-800 text-slate-300 hover:border-slate-600'}`}
-                          >
-                            {tCode} {isDone && '✓'}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Banner */}
-                <div className="p-5 rounded-2xl glass-card border border-blue-500/30 flex justify-between items-center">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-amber-500 text-slate-950 font-black text-xl flex items-center justify-center">
-                      {selectedTeamCode}
-                    </div>
-                    <div>
-                      <p className="text-xs text-slate-400">กำลังประเมินทีม:</p>
-                      <p className="text-lg font-bold text-white">ทีม {selectedTeamCode} ({currentCohort.name})</p>
-                    </div>
-                  </div>
-
-                  <div className="text-right">
-                    <p className="text-xs text-slate-400">คะแนนรวมปัจจุบัน:</p>
-                    <p className="text-3xl font-extrabold text-amber-300">{roundedTotal} <span className="text-xs text-slate-400 font-normal">/ 100</span></p>
-                  </div>
-                </div>
-
-                {/* 6 Category Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                  {EVALUATION_CATEGORIES.map(cat => {
-                    const val = scores[cat.id] ?? '';
-                    const numVal = val === '' ? '' : Number(val);
-                    const isExceeded = numVal !== '' && numVal > cat.maxScore;
-                    return (
-                      <div key={cat.id} className={`glass-card p-5 rounded-2xl border ${isExceeded ? 'border-red-500 bg-red-950/20' : 'border-slate-800'}`}>
-                        <div className="flex justify-between items-center mb-2">
-                          <h3 className="font-semibold text-sm text-white">{cat.title}</h3>
-                          <span className="text-xs bg-slate-800 px-2 py-0.5 rounded text-amber-400 font-bold">เต็ม {cat.maxScore}</span>
-                        </div>
-                        <input 
-                          type="number"
-                          step="0.5"
-                          min="0"
-                          max={cat.maxScore}
-                          value={val}
-                          onChange={e => handleScoreChange(cat.id, e.target.value)}
-                          placeholder={`0 - ${cat.maxScore}`}
-                          className={`w-full text-center text-lg font-bold py-2 rounded-xl glass-input ${isExceeded ? 'border-red-500 text-red-400' : ''}`}
-                        />
-                        {isExceeded && <p className="text-xs text-red-400 font-semibold mt-1">⚠️ กรอกเกินคะแนนเต็ม ({cat.maxScore})</p>}
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Comment */}
-                <div className="glass-card p-5 rounded-2xl border border-slate-800">
-                  <label className="text-sm font-semibold text-slate-200 block mb-2">ความคิดเห็นกรรมการเพิ่มเติม:</label>
-                  <textarea 
-                    rows="3"
-                    value={comment}
-                    onChange={e => setComment(e.target.value)}
-                    placeholder="ระบุข้อเสนอแนะเพิ่มเติมสำหรับทีมนี้..."
-                    className="w-full text-sm p-3 rounded-xl glass-input"
-                  ></textarea>
-                </div>
-
-                {/* Submit button */}
-                <div className="flex justify-end pt-4">
-                  <button 
-                    onClick={handleOpenReview}
-                    className="px-8 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 font-bold text-white text-base shadow-xl"
-                  >
-                    ตรวจสอบและบันทึกคะแนน
-                  </button>
-                </div>
+          </div>
+          <div class="role-card role-admin" onclick="set({loginMode:'admin'})">
+            <div style="display:flex;align-items:center;gap:16px;">
+              <div style="width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,#ede9fe,#f5f3ff);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;">🔐</div>
+              <div>
+                <div style="font-size:16px;font-weight:800;color:#6d28d9;margin-bottom:3px;">Admin / ผู้ดูแลระบบ</div>
+                <div style="font-size:13px;color:#64748b;">ดู Dashboard สรุปคะแนนและอันดับ</div>
               </div>
-            ) : (
-              /* Admin Dashboard */
-              <div className="space-y-8">
-                <div className="glass-panel p-6 rounded-3xl border border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                  <div>
-                    <span className="text-xs font-semibold text-purple-400 bg-purple-500/10 px-3 py-1 rounded-full border border-purple-500/20">หลังบ้าน / Admin Dashboard</span>
-                    <h2 className="text-2xl font-bold text-white mt-1">สรุปอันดับคะแนนและรายงาน</h2>
-                  </div>
-
-                  <div className="flex gap-2">
-                    <button onClick={seedDemo} className="px-4 py-2 rounded-xl bg-purple-600/30 text-purple-200 border border-purple-500/40 text-xs font-semibold">
-                      ⚡ สร้างข้อมูลจำลอง (Demo Data)
-                    </button>
-                    <button onClick={() => { localStorage.removeItem(STORAGE_KEY); refreshData(); }} className="px-4 py-2 rounded-xl bg-rose-950/40 text-rose-300 border border-rose-800/40 text-xs font-semibold">
-                      🗑️ รีเซ็ตคะแนน
-                    </button>
-                  </div>
-                </div>
-
-                {/* Cohort Tabs for Admin */}
-                <div className="flex gap-2">
-                  <button onClick={() => setAdminCohortFilter('all')} className={`px-4 py-2 rounded-xl text-xs font-semibold ${adminCohortFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-slate-900 text-slate-400'}`}>
-                    รวมทุกรุ่น (31 ทีม)
-                  </button>
-                  {COHORTS.map(c => (
-                    <button key={c.id} onClick={() => setAdminCohortFilter(c.id)} className={`px-4 py-2 rounded-xl text-xs font-semibold ${adminCohortFilter === c.id ? 'bg-blue-600 text-white' : 'bg-slate-900 text-slate-400'}`}>
-                      {c.name} ({c.teamCount} ทีม)
-                    </button>
-                  ))}
-                </div>
-
-                {/* Leaderboard Table */}
-                <div className="glass-panel rounded-2xl border border-slate-800 overflow-x-auto">
-                  <table className="w-full text-left border-collapse text-sm">
-                    <thead>
-                      <tr className="border-b border-slate-800 bg-slate-900/90 text-slate-400 text-xs uppercase">
-                        <th className="py-3 px-4 text-center">อันดับ</th>
-                        <th className="py-3 px-4">รุ่น</th>
-                        <th className="py-3 px-4">ทีม</th>
-                        <th className="py-3 px-4 text-center">คะแนนเฉลี่ยรวม (100)</th>
-                        <th className="py-3 px-4 text-center">กรรมการ</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-800 text-slate-200">
-                      {leaderboard.map((item) => (
-                        <tr key={`${item.cohortName}_${item.teamCode}`} className="hover:bg-slate-800/40">
-                          <td className="py-3 px-4 text-center font-bold">
-                            {item.rank === 1 ? '🥇 อันดับ 1' : item.rank === 2 ? '🥈 อันดับ 2' : item.rank === 3 ? '🥉 อันดับ 3' : `#${item.rank}`}
-                          </td>
-                          <td className="py-3 px-4 text-xs text-slate-400">{item.cohortName}</td>
-                          <td className="py-3 px-4 font-bold text-amber-300">{item.teamCode}</td>
-                          <td className="py-3 px-4 text-center font-extrabold text-blue-400 text-base">{item.count > 0 ? item.avg : '-'}</td>
-                          <td className="py-3 px-4 text-center text-xs text-slate-400">{item.count} คน</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-
-            {/* Modal */}
-            {isReviewOpen && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
-                <div className="glass-panel w-full max-w-lg rounded-2xl p-6 border border-slate-700 space-y-4">
-                  <h3 className="text-xl font-bold text-white">สรุปก่อนบันทึกคะแนน</h3>
-                  <div className="p-3 bg-slate-900 rounded-xl space-y-1 text-sm">
-                    <p>กรรมการ: <span className="font-semibold text-blue-400">{judgeName}</span></p>
-                    <p>รุ่น: <span className="font-semibold text-slate-200">{currentCohort.name}</span></p>
-                    <p>ทีม: <span className="font-bold text-amber-300">{selectedTeamCode}</span></p>
-                    <p className="text-lg font-extrabold text-emerald-400 pt-2 border-t border-slate-800">คะแนนรวมสุทธิ: {roundedTotal} / 100</p>
-                  </div>
-                  <div className="flex justify-end gap-3 pt-2">
-                    <button onClick={() => setIsReviewOpen(false)} className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-sm">กลับไปแก้ไข</button>
-                    <button onClick={handleConfirmSubmit} className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-sm">ยืนยันบันทึกคะแนน</button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </main>
+              <div style="margin-left:auto;color:#c4b5fd;font-size:22px;font-weight:300;">›</div>
+            </div>
+          </div>
         </div>
-      );
+        ` : isJudge ? `
+        <button onclick="set({loginMode:''})" class="btn-sm" style="margin-bottom:20px;">← ย้อนกลับ</button>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:22px;">
+          <div style="width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,#dbeafe,#eff6ff);display:flex;align-items:center;justify-content:center;font-size:22px;">🧑‍⚖️</div>
+          <div>
+            <div style="font-size:16px;font-weight:800;color:#1d4ed8;">กรรมการผู้ประเมิน</div>
+            <div style="font-size:12px;color:#64748b;">เลือกชื่อเพื่อเริ่มลงคะแนน</div>
+          </div>
+        </div>
+        <label style="font-size:13px;color:#475569;font-weight:600;display:block;margin-bottom:8px;">ชื่อกรรมการ:</label>
+        <select class="select-inp" onchange="set({judgeName:this.value})" style="margin-bottom:22px;">
+          ${['กรรมการ 1','กรรมการ 2','กรรมการ 3','กรรมการ 4','กรรมการ 5'].map(j=>`<option value="${j}" ${S.judgeName===j?'selected':''}>${j}</option>`).join('')}
+        </select>
+        <button class="btn btn-judge" style="width:100%;justify-content:center;" onclick="enterJudge()">เข้าสู่ระบบลงคะแนน →</button>
+        ` : `
+        <button onclick="set({loginMode:'',loginPass:'',loginPassErr:false})" class="btn-sm" style="margin-bottom:20px;">← ย้อนกลับ</button>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:22px;">
+          <div style="width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,#ede9fe,#f5f3ff);display:flex;align-items:center;justify-content:center;font-size:22px;">🔐</div>
+          <div>
+            <div style="font-size:16px;font-weight:800;color:#6d28d9;">Admin Dashboard</div>
+            <div style="font-size:12px;color:#64748b;">ใส่รหัสผ่านเพื่อเข้าถึง</div>
+          </div>
+        </div>
+        <label style="font-size:13px;color:#475569;font-weight:600;display:block;margin-bottom:8px;">รหัสผ่าน Admin:</label>
+        <input type="password" id="adminPassInp" class="inp ${S.loginPassErr?'err':''}" placeholder="••••••••••"
+          oninput="S.loginPass=this.value;S.loginPassErr=false;"
+          onkeydown="if(event.key==='Enter')enterAdmin()"
+          style="margin-bottom:${S.loginPassErr?'8':'22'}px;">
+        ${S.loginPassErr?`<div style="color:#ef4444;font-size:13px;margin-bottom:16px;display:flex;align-items:center;gap:6px;"><span>⚠️</span> รหัสผ่านไม่ถูกต้อง</div>`:''}
+        <button class="btn btn-admin" style="width:100%;justify-content:center;" onclick="enterAdmin()">เข้าสู่ Admin Dashboard →</button>
+        `}
+      </div>
+
+      <p style="text-align:center;color:#cbd5e1;font-size:12px;margin-top:20px;">© 2026 ระบบลงคะแนนประเมินผลการอบรม · ข้อมูลเก็บในเบราว์เซอร์</p>
+    </div>
+  </div>`;
+}
+
+// ========================== NAV ==========================
+function renderJudgeNav(){
+  return `
+  <nav class="nav">
+    <div style="max-width:1200px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:68px;">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#4f46e5,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 4px 14px rgba(79,70,229,.3);">🏆</div>
+        <div>
+          <div style="font-weight:900;font-size:15px;color:#1e293b;">SCORING SYSTEM</div>
+          <div style="font-size:11px;color:#94a3b8;">หน้ากรรมการลงคะแนน</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button onclick="if(confirm('ล้างข้อมูลทั้งหมดเพื่อทดสอบใหม่?')){clearAll();set({scores:{},comment:'',errors:{}})}" style="background:#fef2f2;color:#dc2626;border:1.5px solid #fecaca;border-radius:10px;padding:6px 12px;cursor:pointer;font-size:12px;font-weight:700;font-family:'Prompt',sans-serif;transition:all .2s;" title="ล้างข้อมูลทดสอบ">🗑️ ล้างข้อมูล</button>
+        <span class="badge-judge">🧑‍⚖️ ${S.judgeName}</span>
+        <button class="badge-logout" onclick="logout()">ออกจากระบบ</button>
+      </div>
+    </div>
+  </nav>`;
+}
+
+function renderAdminNav(){
+  return `
+  <nav class="nav">
+    <div style="max-width:1300px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:68px;">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#7c3aed,#db2777);display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 4px 14px rgba(124,58,237,.3);">📊</div>
+        <div>
+          <div style="font-weight:900;font-size:15px;color:#1e293b;">ADMIN DASHBOARD</div>
+          <div style="font-size:11px;color:#94a3b8;">ภาพรวมคะแนนและอันดับ</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span class="badge-admin">🔐 Admin Mode</span>
+        <button class="badge-logout" onclick="logout()">ออกจากระบบ</button>
+      </div>
+    </div>
+  </nav>`;
+}
+
+// ========================== JUDGE VIEW ==========================
+function renderJudge(){
+  const cohort=COHORTS.find(c=>c.id===S.cohortId);
+  const evaluated=evaluatedByJudge(S.cohortId,S.judgeName);
+  const isSaved=evaluated.has(S.teamCode);
+  const tot=total(S.scores);
+  const filledCount=CATEGORIES.filter(c=>S.scores[c.id]!==undefined&&S.scores[c.id]!=='').length;
+
+  const teamButtons=cohort.teams.map(t=>{
+    const sel=t===S.teamCode, done=evaluated.has(t);
+    return `<button class="team-btn ${sel?'t-sel':done?'t-done':'t-idle'}" onclick="selectTeam('${t}')">
+      ${t}${done&&!sel?'<span style="font-size:9px;display:block;">✓</span>':''}
+    </button>`;
+  }).join('');
+
+  const catCards=CATEGORIES.map(cat=>{
+    const val=S.scores[cat.id]??'';
+    const num=parseFloat(val);
+    const pctBar=(!isNaN(num)&&num>0)?Math.min(100,(num/cat.max)*100):0;
+
+    if(isSaved){
+      return `
+      <div class="cat-card-locked">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:9px;height:9px;border-radius:50%;background:${cat.bar};opacity:.5;flex-shrink:0;"></div>
+            <span style="font-weight:700;font-size:13px;color:#94a3b8;">${cat.title}</span>
+          </div>
+          <span style="font-size:11px;background:#f1f5f9;color:#94a3b8;padding:3px 10px;border-radius:20px;border:1px solid #e2e8f0;font-weight:700;">เต็ม ${cat.max}</span>
+        </div>
+        <div style="margin-bottom:10px;"><input type="number" class="score-inp-locked" value="${val}" disabled></div>
+        <div class="prog-bg"><div style="height:100%;width:${pctBar}%;background:${cat.bar};border-radius:999px;opacity:.5;"></div></div>
+      </div>`;
     }
 
-    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-  </script>
+    const over=val!==''&&!isNaN(num)&&num>cat.max;
+    const pct2=(!over&&val!==''&&!isNaN(num))?Math.min(100,(num/cat.max)*100):0;
+    const err=S.errors[cat.id];
+    const isEmpty=val===''||val===undefined;
+    return `
+    <div id="card_${cat.id}" class="cat-card ${(over||err)?'err-card':''}" style="border-color:${!over&&!err&&!isEmpty?cat.border:''};">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="width:10px;height:10px;border-radius:50%;background:${cat.bar};flex-shrink:0;"></div>
+          <span style="font-weight:700;font-size:13px;color:${cat.color};">${cat.title}</span>
+        </div>
+        <span style="font-size:11px;background:${cat.bg};color:${cat.color};padding:3px 10px;border-radius:20px;border:1px solid ${cat.border};font-weight:700;">เต็ม ${cat.max}</span>
+      </div>
+      <div style="margin-bottom:10px;">
+        <input type="number" id="inp_${cat.id}" class="score-inp ${(over||err)?'err':''}" value="${val}"
+          min="0" max="${cat.max}" step="0.5"
+          onwheel="this.blur()"
+          onkeydown="if(event.key==='ArrowUp'||event.key==='ArrowDown'){event.preventDefault();}"
+          oninput="onInp('${cat.id}',this.value,'${cat.max}','${cat.bar}')" placeholder="0 – ${cat.max}">
+      </div>
+      <div class="prog-bg"><div id="bar_${cat.id}" style="height:100%;width:${pct2}%;background:${cat.bar};border-radius:999px;transition:width .3s;"></div></div>
+      <div id="err_${cat.id}" style="color:#ef4444;font-size:11px;margin-top:8px;font-weight:600;display:${(over||err)?'flex':'none'};align-items:center;gap:4px;">
+        <span>⚠️</span> ${over?`เกินคะแนนเต็ม (สูงสุด ${cat.max})`:(err||'')}
+      </div>
+    </div>`;
+  }).join('');
+
+  const bannerGrad=isSaved?'linear-gradient(135deg,#059669,#10b981)':'linear-gradient(135deg,#4f46e5,#7c3aed)';
+  const bannerShadow=isSaved?'0 8px 32px rgba(5,150,105,.25)':'0 8px 32px rgba(79,70,229,.25)';
+
+  return renderJudgeNav() + `
+  <div style="max-width:1200px;margin:0 auto;padding:32px 24px 72px;display:flex;flex-direction:column;gap:22px;">
+
+    <!-- Header -->
+    <div class="card-blue" style="padding:28px;">
+      <span class="badge-blue" style="margin-bottom:12px;display:inline-flex;align-items:center;gap:6px;">✏️ แบบประเมินกรรมการ</span>
+      <h1 style="font-size:24px;font-weight:900;color:#1e293b;margin:0;">กรอกคะแนนประเมินผลงาน</h1>
+      <p style="color:#64748b;font-size:13px;margin-top:6px;">เกณฑ์ 6 หมวด · คะแนนเต็ม 100 คะแนน · กรรมการ: <strong style="color:#4338ca;">${S.judgeName}</strong></p>
+    </div>
+
+    <!-- Cohort selector -->
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      ${COHORTS.map(c=>`<button class="coh-btn ${S.cohortId===c.id?'coh-act':'coh-ina'}" onclick="selectCohort('${c.id}','${c.teams[0]}')">${c.name} <span style="font-size:12px;opacity:.8;">(${c.teams.length} ทีม)</span></button>`).join('')}
+    </div>
+
+    <!-- Team grid -->
+    <div class="card" style="padding:22px;">
+      <div style="font-size:13px;font-weight:700;color:#475569;margin-bottom:14px;">เลือกทีมที่ต้องการประเมิน (${cohort.name}):</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px;">${teamButtons}</div>
+      <div style="font-size:11px;color:#94a3b8;margin-top:12px;display:flex;align-items:center;gap:6px;">
+        <span style="color:#059669;font-weight:700;">✓</span> = บันทึกแล้ว (ดูได้อย่างเดียว)
+      </div>
+    </div>
+
+    <!-- Banner -->
+    <div style="background:${bannerGrad};border-radius:20px;padding:24px;color:#fff;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;box-shadow:${bannerShadow};">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div style="width:56px;height:56px;border-radius:18px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;border:2px solid rgba(255,255,255,.4);">${S.teamCode}</div>
+        <div>
+          <div style="font-size:12px;opacity:.75;">${isSaved?'🔒 ดูคะแนนที่บันทึกแล้ว':'กำลังประเมินทีม:'}</div>
+          <div style="font-size:20px;font-weight:900;">ทีม ${S.teamCode} · ${cohort.name}</div>
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:12px;opacity:.7;">${isSaved?'คะแนนที่ยืนยันแล้ว':'คะแนนรวมปัจจุบัน'}</div>
+        <div style="font-size:42px;font-weight:900;line-height:1;"><span id="total_score">${tot}</span> <span style="font-size:16px;opacity:.6;font-weight:400;">/100</span></div>
+        <div style="background:rgba(255,255,255,.25);border-radius:999px;height:5px;margin-top:8px;overflow:hidden;min-width:180px;">
+          <div id="total_bar" style="height:100%;width:${tot}%;background:rgba(255,255,255,.9);border-radius:999px;transition:width .4s;"></div>
+        </div>
+      </div>
+    </div>
+
+    ${isSaved ? `
+    <div style="background:#ecfdf5;border:1.5px solid #6ee7b7;border-radius:16px;padding:18px 24px;display:flex;align-items:center;gap:14px;">
+      <div style="font-size:26px;flex-shrink:0;">🔒</div>
+      <div>
+        <div style="font-size:15px;font-weight:800;color:#065f46;">บันทึกคะแนนเรียบร้อยแล้ว — ไม่สามารถแก้ไขได้</div>
+        <div style="font-size:13px;color:#047857;margin-top:2px;">กรุณาเลือกทีมอื่นเพื่อลงคะแนนต่อไป</div>
+      </div>
+    </div>` : ''}
+
+    <!-- Category cards -->
+    <div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <h2 style="font-size:16px;font-weight:800;color:#1e293b;margin:0;">${isSaved?'🔒 คะแนนที่บันทึก (ดูได้อย่างเดียว)':'⭐ เกณฑ์การประเมิน 6 หมวด'}</h2>
+        ${!isSaved?'<span style="font-size:11px;color:#94a3b8;">* ระบบบล็อกการกรอกเกินคะแนนเต็มอัตโนมัติ</span>':''}
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;">${catCards}</div>
+    </div>
+
+    ${isSaved ? `
+    ${S.comment?`
+    <div class="card" style="padding:22px;background:#f8fafc;">
+      <div style="font-size:14px;font-weight:700;color:#475569;margin-bottom:8px;">💬 ความคิดเห็นที่บันทึกไว้</div>
+      <div style="font-size:14px;color:#64748b;font-style:italic;line-height:1.7;">"${S.comment}"</div>
+    </div>`:''}`:`
+    <div class="card" style="padding:22px;">
+      <label style="font-size:14px;font-weight:700;color:#1e293b;display:block;margin-bottom:12px;">💬 ความคิดเห็นกรรมการ <span style="color:#94a3b8;font-weight:400;font-size:12px;">(ไม่บังคับ)</span></label>
+      <textarea class="ta" rows="3" placeholder="ระบุข้อเสนอแนะ จุดเด่น หรือข้อแนะนำสำหรับทีม..." oninput="S.comment=this.value">${S.comment||''}</textarea>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:12px;flex-wrap:wrap;padding-top:4px;">
+      <button class="btn btn-outline" onclick="resetForm()">🔄 ล้างฟอร์ม</button>
+      <button class="btn btn-primary" onclick="openModal()">ตรวจสอบและบันทึกคะแนน →</button>
+    </div>
+    `}
+
+  </div>` + renderModal();
+}
+
+// ========================== ADMIN ==========================
+function renderAdmin(){
+  const all=getAll();
+  const board1=buildBoard('c1');
+  const board2=buildBoard('c2');
+  const ev1=board1.filter(i=>i.count>0);
+  const ev2=board2.filter(i=>i.count>0);
+  const top3c1=ev1.slice(0,3);
+  const top3c2=ev2.slice(0,3);
+  const rankIcon=r=>r===1?'🥇':r===2?'🥈':r===3?'🥉':'<span style="font-weight:700;color:#94a3b8;">#'+r+'</span>';
+  const mStyle=[
+    {bg:'linear-gradient(135deg,#fef9c3,#fde68a)',border:'#f59e0b',color:'#78350f',badge:'#d97706',icon:'🥇'},
+    {bg:'linear-gradient(135deg,#f1f5f9,#e2e8f0)',border:'#94a3b8',color:'#1e293b',badge:'#64748b',icon:'🥈'},
+    {bg:'linear-gradient(135deg,#fff7ed,#fed7aa)',border:'#f97316',color:'#7c2d12',badge:'#ea580c',icon:'🥉'}
+  ];
+
+  const awardCards=(top3, cId)=>{
+    if(!top3.length) return '<div style="padding:36px;text-align:center;color:#94a3b8;font-size:14px;font-style:italic;">ยังไม่มีข้อมูลคะแนน</div>';
+    return top3.map((item,i)=>{
+      const m=mStyle[i];
+      return '<div onclick="openTeamDetail(\''+cId+'\',\''+item.team+'\')" title="คลิกเพื่อดูคะแนนแยกตามกรรมการ" style="background:'+m.bg+';border:2px solid '+m.border+';border-radius:16px;padding:18px;display:flex;align-items:center;gap:14px;position:relative;overflow:hidden;cursor:pointer;transition:all .2s;" onmouseover="this.style.transform=\'translateY(-3px)\';this.style.boxShadow=\'0 8px 24px rgba(0,0,0,.15)\'" onmouseout="this.style.transform=\'none\';this.style.boxShadow=\'none\'">'
+        +'<div style="position:absolute;right:-8px;top:-8px;font-size:52px;opacity:.1;">'+m.icon+'</div>'
+        +'<div style="font-size:34px;flex-shrink:0;">'+m.icon+'</div>'
+        +'<div style="flex:1;min-width:0;">'
+          +'<div style="font-size:11px;color:'+m.color+';opacity:.65;font-weight:600;">อันดับที่ '+(i+1)+'</div>'
+          +'<div style="font-size:19px;font-weight:900;color:'+m.color+';overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+item.team+' <span style="font-size:11px;opacity:.7;">🔍</span></div>'
+          +'<div style="background:rgba(0,0,0,.08);border-radius:99px;height:4px;margin-top:7px;overflow:hidden;">'
+            +'<div style="height:100%;width:'+Math.min(100,item.avg)+'%;background:'+m.badge+';border-radius:99px;"></div>'
+          +'</div>'
+        +'</div>'
+        +'<div style="text-align:center;flex-shrink:0;">'
+          +'<div style="font-size:28px;font-weight:900;color:'+m.color+';line-height:1;">'+item.avg+'</div>'
+          +'<div style="font-size:10px;color:'+m.color+';opacity:.6;">/100</div>'
+          +'<div style="margin-top:5px;background:'+m.badge+';color:#fff;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;">'+item.count+' กก.</div>'
+        +'</div>'
+      +'</div>';
+    }).join('');
+  };
+
+  const leaderTable=(board,cohortId)=>{
+    if(!board.filter(i=>i.count>0).length)
+      return '<div style="padding:40px;text-align:center;color:#94a3b8;font-size:14px;">ยังไม่มีข้อมูลคะแนน</div>';
+    return '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13px;">'
+      +'<thead><tr style="background:#f8faff;">'
+      +'<th style="padding:11px 14px;color:#64748b;font-size:11px;font-weight:700;text-align:left;border-bottom:1px solid #f1f5f9;white-space:nowrap;">อันดับ</th>'
+      +'<th style="padding:11px 10px;color:#64748b;font-size:11px;font-weight:700;text-align:left;border-bottom:1px solid #f1f5f9;">ทีม</th>'
+      +'<th style="padding:11px 10px;color:#64748b;font-size:11px;font-weight:700;text-align:center;border-bottom:1px solid #f1f5f9;">เฉลี่ย/100</th>'
+      +CATEGORIES.map(c=>'<th style="padding:11px 7px;color:#64748b;font-size:10px;font-weight:700;text-align:center;border-bottom:1px solid #f1f5f9;white-space:nowrap;">'+(c.title.length>9?c.title.slice(0,9)+'…':c.title)+'<br><span style="font-weight:400;color:#94a3b8;">('+c.max+')</span></th>').join('')
+      +'<th style="padding:11px 10px;color:#64748b;font-size:11px;font-weight:700;text-align:center;border-bottom:1px solid #f1f5f9;">กรรมการ</th>'
+      +'<th style="padding:11px 10px;color:#64748b;font-size:11px;font-weight:700;text-align:center;border-bottom:1px solid #f1f5f9;">รายละเอียด</th>'
+      +'</tr></thead>'
+      +'<tbody>'+board.map(item=>`
+        <tr class="tbl-row" style="border-bottom:1px solid #f8f9ff;cursor:pointer;${item.rank===1?'background:#fffbeb;':item.rank===2?'background:#f9fafb;':item.rank===3?'background:#fff7ed;':''}" onclick="openTeamDetail('${cohortId}','${item.team}')" title="คลิกเพื่อดูคะแนนแต่ละกรรมการ">
+          <td style="padding:13px 14px;font-size:${item.rank&&item.rank<=3?18:13}px;font-weight:700;">${item.rank?rankIcon(item.rank):'<span style="color:#e2e8f0;">—</span>'}</td>
+          <td style="padding:11px 10px;font-weight:800;color:#4338ca;font-size:14px;">${item.team}</td>
+          <td style="padding:11px 10px;text-align:center;">${item.count>0?'<span style="font-size:18px;font-weight:900;color:#6366f1;">'+item.avg+'</span>':'<span style="color:#cbd5e1;font-size:12px;">—</span>'}</td>
+          ${CATEGORIES.map(cat=>'<td style="padding:11px 7px;text-align:center;font-size:12px;font-weight:700;color:'+(item.catAvgs&&item.catAvgs[cat.id]>=cat.max*.85?'#059669':'#94a3b8')+';">'+(item.catAvgs?item.catAvgs[cat.id]:'-')+'</td>').join('')}
+          <td style="padding:11px 10px;text-align:center;">${item.count>0?'<span style="background:#eff6ff;color:#2563eb;padding:3px 10px;border-radius:20px;font-size:11px;border:1px solid #bfdbfe;font-weight:700;">'+item.count+' คน</span>':'<span style="color:#e2e8f0;font-size:12px;">—</span>'}</td>
+          <td style="padding:11px 10px;text-align:center;">
+            <button onclick="event.stopPropagation();openTeamDetail('${cohortId}','${item.team}')" style="background:#eff6ff;color:#2563eb;border:1.5px solid #bfdbfe;padding:6px 14px;border-radius:12px;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;font-family:'Prompt',sans-serif;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#eff6ff'">👁️ ดูคะแนนรายคน</button>
+          </td>
+        </tr>`).join('')
+      +'</tbody></table></div>';
+  };
+
+  return renderAdminNav() + `
+  <div style="max-width:1300px;margin:0 auto;padding:32px 24px 72px;display:flex;flex-direction:column;gap:24px;">
+
+    <!-- Header -->
+    <div class="card-purple" style="padding:26px;">
+      <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:16px;">
+        <div>
+          <span class="badge-purple" style="margin-bottom:10px;display:inline-flex;align-items:center;gap:6px;">📊 Admin Dashboard</span>
+          <h1 style="font-size:23px;font-weight:900;color:#1e293b;margin:0;">สรุปผลคะแนนและรางวัล</h1>
+          <p style="color:#64748b;font-size:13px;margin-top:4px;">2 รุ่นการอบรม · รุ่นละ 3 รางวัล · คลิกทีมเพื่อดูคะแนนแยกรายกรรมการ</p>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          <button onclick="seedDemo()" style="background:#f5f3ff;color:#7c3aed;border:1.5px solid #ddd6fe;border-radius:14px;padding:9px 16px;cursor:pointer;font-size:13px;font-weight:700;font-family:'Prompt',sans-serif;transition:all .2s;" onmouseover="this.style.background='#ede9fe'" onmouseout="this.style.background='#f5f3ff'">⚡ ข้อมูลจำลอง</button>
+          <button onclick="exportCSV()" style="background:#ecfdf5;color:#059669;border:1.5px solid #a7f3d0;border-radius:14px;padding:9px 16px;cursor:pointer;font-size:13px;font-weight:700;font-family:'Prompt',sans-serif;transition:all .2s;" onmouseover="this.style.background='#d1fae5'" onmouseout="this.style.background='#ecfdf5'">📥 Export CSV</button>
+          <button onclick="if(confirm('ลบข้อมูลทั้งหมด?')){clearAll();set({})}" style="background:#fef2f2;color:#ef4444;border:1.5px solid #fecaca;border-radius:14px;padding:9px 16px;cursor:pointer;font-size:13px;font-weight:700;font-family:'Prompt',sans-serif;transition:all .2s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#fef2f2'">🗑️ รีเซ็ต</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:12px;">
+      ${[
+        {icon:'📋',label:'บันทึกทั้งหมด',value:all.length+' รายการ',color:'#2563eb',bg:'#eff6ff',bc:'#bfdbfe'},
+        {icon:'🔵',label:'รุ่น 1 มีคะแนน',value:ev1.length+'/'+board1.length+' ทีม',color:'#2563eb',bg:'#eff6ff',bc:'#bfdbfe'},
+        {icon:'🟣',label:'รุ่น 2 มีคะแนน',value:ev2.length+'/'+board2.length+' ทีม',color:'#7c3aed',bg:'#f5f3ff',bc:'#ddd6fe'},
+        {icon:'🥇',label:'แชมป์รุ่น 1',value:top3c1[0]?top3c1[0].team+' ('+top3c1[0].avg+')':'-',color:'#d97706',bg:'#fffbeb',bc:'#fde68a'},
+        {icon:'🥇',label:'แชมป์รุ่น 2',value:top3c2[0]?top3c2[0].team+' ('+top3c2[0].avg+')':'-',color:'#db2777',bg:'#fdf2f8',bc:'#fbcfe8'},
+      ].map(s=>'<div class="stat-card" style="background:'+s.bg+';border-color:'+s.bc+';">'
+        +'<div style="display:flex;align-items:center;gap:10px;">'
+        +'<div style="font-size:24px;">'+s.icon+'</div>'
+        +'<div>'
+        +'<div style="font-size:11px;color:#64748b;margin-bottom:2px;">'+s.label+'</div>'
+        +'<div style="font-size:13px;font-weight:800;color:'+s.color+';">'+s.value+'</div>'
+        +'</div></div></div>').join('')}
+    </div>
+
+    <!-- Awards: 2 columns -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+      <!-- รุ่นที่ 1 -->
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div style="background:linear-gradient(135deg,#2563eb,#4f46e5);padding:16px 20px;display:flex;align-items:center;gap:12px;">
+          <div style="font-size:24px;">🏆</div>
+          <div>
+            <div style="font-size:15px;font-weight:900;color:#fff;">รางวัล รุ่นที่ 1</div>
+            <div style="font-size:11px;color:rgba(255,255,255,.7);">${COHORTS[0].teams.length} ทีม · 3 รางวัล</div>
+          </div>
+        </div>
+        <div style="padding:16px;display:flex;flex-direction:column;gap:10px;">
+          ${awardCards(top3c1, 'c1')}
+        </div>
+      </div>
+      <!-- รุ่นที่ 2 -->
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div style="background:linear-gradient(135deg,#7c3aed,#db2777);padding:16px 20px;display:flex;align-items:center;gap:12px;">
+          <div style="font-size:24px;">🏆</div>
+          <div>
+            <div style="font-size:15px;font-weight:900;color:#fff;">รางวัล รุ่นที่ 2</div>
+            <div style="font-size:11px;color:rgba(255,255,255,.7);">${COHORTS[1].teams.length} ทีม · 3 รางวัล</div>
+          </div>
+        </div>
+        <div style="padding:16px;display:flex;flex-direction:column;gap:10px;">
+          ${awardCards(top3c2, 'c2')}
+        </div>
+      </div>
+    </div>
+
+    <!-- Table รุ่นที่ 1 -->
+    <div class="card" style="overflow:hidden;padding:0;">
+      <div style="padding:16px 22px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:12px;background:linear-gradient(to right,#eff6ff,#fff);">
+        <div style="width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#2563eb,#4f46e5);display:flex;align-items:center;justify-content:center;font-size:15px;">🏅</div>
+        <div>
+          <div style="font-size:14px;font-weight:800;color:#1e293b;">ตารางคะแนนรวม รุ่นที่ 1</div>
+          <div style="font-size:11px;color:#94a3b8;">${board1.length} ทีม (คลิกแถวเพื่อดูรายละเอียดคะแนนรายกรรมการ)</div>
+        </div>
+      </div>
+      ${leaderTable(board1,'c1')}
+    </div>
+
+    <!-- Table รุ่นที่ 2 -->
+    <div class="card" style="overflow:hidden;padding:0;">
+      <div style="padding:16px 22px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:12px;background:linear-gradient(to right,#fdf4ff,#fff);">
+        <div style="width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#7c3aed,#db2777);display:flex;align-items:center;justify-content:center;font-size:15px;">🏅</div>
+        <div>
+          <div style="font-size:14px;font-weight:800;color:#1e293b;">ตารางคะแนนรวม รุ่นที่ 2</div>
+          <div style="font-size:11px;color:#94a3b8;">${board2.length} ทีม (คลิกแถวเพื่อดูรายละเอียดคะแนนรายกรรมการ)</div>
+        </div>
+      </div>
+      ${leaderTable(board2,'c2')}
+    </div>
+
+  </div>` + renderTeamModal();
+}
+
+
+// ========================== TEAM DETAIL MODAL ==========================
+function renderTeamModal(){
+  if(!S.selectedTeam) return '';
+  const {cohortId, teamCode} = S.selectedTeam;
+  const cohort = COHORTS.find(c=>c.id===cohortId);
+  const records = getAll().filter(r=>r.cohortId===cohortId && r.teamCode===teamCode);
+
+  if(!records.length) {
+    return `
+    <div class="modal-ov" onclick="if(event.target===this)set({selectedTeam:null})">
+      <div class="modal-box" style="max-width:480px;text-align:center;padding:36px 24px;">
+        <div style="font-size:52px;margin-bottom:12px;">⏳</div>
+        <h3 style="font-size:22px;font-weight:900;color:#1e293b;margin-bottom:6px;">ทีม ${teamCode}</h3>
+        <p style="color:#64748b;font-size:14px;margin-bottom:20px;">${cohort?cohort.name:cohortId} · ยังไม่มีกรรมการคนใดลงคะแนนให้ทีมนี้</p>
+        <button class="btn btn-outline" style="margin:0 auto;" onclick="set({selectedTeam:null})">✕ ปิดหน้าต่าง</button>
+      </div>
+    </div>`;
+  }
+
+  const avg = Math.round(records.reduce((s,r)=>s+(parseFloat(r.total)||0),0)/records.length*10)/10;
+
+  const catAvgRow = {};
+  CATEGORIES.forEach(cat=>{
+    const catSum = records.reduce((s,r)=>s+(parseFloat(r.scores?.[cat.id])||0),0);
+    catAvgRow[cat.id] = Math.round((catSum / records.length) * 10) / 10;
+  });
+
+  const judgeTableRows = records.map(r => `
+    <tr style="border-bottom:1px solid #f1f5f9;">
+      <td style="padding:12px 14px;text-align:left;font-weight:800;color:#1e293b;white-space:nowrap;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="background:#eff6ff;color:#2563eb;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;">⚖️</span>
+          <span>${r.judge}</span>
+        </div>
+      </td>
+      <td style="padding:12px;font-weight:900;font-size:17px;color:#4f46e5;background:#f5f3ff;">
+        ${r.total||0} <span style="font-size:10px;color:#94a3b8;font-weight:400;">/100</span>
+      </td>
+      ${CATEGORIES.map(cat => `<td style="padding:10px 8px;font-weight:800;color:${r.scores?.[cat.id]>=cat.max*0.85?'#059669':'#334155'};">${r.scores?.[cat.id]??'-'}</td>`).join('')}
+      <td style="padding:12px 14px;text-align:left;color:#64748b;font-style:italic;max-width:200px;font-size:12px;" title="${(r.comment||'').replace(/"/g,'&quot;')}">
+        ${r.comment ? `"${r.comment}"` : '<span style="color:#cbd5e1;">-</span>'}
+      </td>
+    </tr>
+  `).join('');
+
+  const judgeCards = records.map(r=>{
+    const rowTotal = r.total || 0;
+    const pct = Math.min(100, rowTotal);
+    return `
+    <div style="background:#fff;border:1.5px solid #e0e7ff;border-radius:18px;padding:20px;margin-bottom:14px;box-shadow:0 4px 16px rgba(99,102,241,.06);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,#4f46e5,#7c3aed);display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;box-shadow:0 4px 12px rgba(79,70,229,.3);">🧑‍⚖️</div>
+          <div>
+            <div style="font-size:16px;font-weight:900;color:#1e293b;">${r.judge}</div>
+            ${r.savedAt?'<div style="font-size:11px;color:#94a3b8;">🕒 '+new Date(r.savedAt).toLocaleString('th-TH',{dateStyle:'short',timeStyle:'short'})+' น.</div>':''}
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:28px;font-weight:900;color:#4f46e5;line-height:1;">${rowTotal}</div>
+          <div style="font-size:11px;color:#94a3b8;font-weight:600;">/ 100 คะแนน</div>
+        </div>
+      </div>
+      <div style="background:#e0e7ff;border-radius:99px;height:6px;overflow:hidden;margin-bottom:16px;">
+        <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#4f46e5,#7c3aed);border-radius:99px;transition:width .5s;"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+        ${CATEGORIES.map(cat=>{
+          const v=r.scores?.[cat.id]??0;
+          const p=Math.min(100,(v/cat.max)*100);
+          return '<div style="background:'+cat.bg+';border:1px solid '+cat.border+';border-radius:12px;padding:10px;text-align:center;">'
+            +'<div style="font-size:10px;color:'+cat.color+';font-weight:700;margin-bottom:4px;line-height:1.3;">'+cat.title+'</div>'
+            +'<div style="font-size:18px;font-weight:900;color:'+cat.color+';">'+v+' <span style="font-size:10px;color:#94a3b8;font-weight:400;">/'+cat.max+'</span></div>'
+            +'<div style="background:rgba(0,0,0,.06);border-radius:99px;height:4px;margin-top:6px;overflow:hidden;">'
+              +'<div style="height:100%;width:'+p+'%;background:'+cat.bar+';border-radius:99px;"></div>'
+            +'</div>'
+          +'</div>';
+        }).join('')}
+      </div>
+      ${r.comment?'<div style="margin-top:14px;padding:12px 16px;background:#f8faff;border-left:4px solid #6366f1;border-radius:0 12px 12px 0;font-size:13px;color:#475569;font-style:italic;">💬 "'+r.comment+'"</div>':''}
+    </div>`;
+  }).join('');
+
+  return `
+  <div class="modal-ov" onclick="if(event.target===this)set({selectedTeam:null})">
+    <div class="modal-box" style="max-width:850px;width:95%;max-height:92vh;overflow-y:auto;padding:28px;">
+      
+      <!-- Modal Header -->
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div style="width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,#4f46e5,#7c3aed);display:flex;align-items:center;justify-content:center;color:#fff;font-size:24px;font-weight:900;box-shadow:0 6px 20px rgba(79,70,229,.3);">${teamCode}</div>
+          <div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="badge-blue">${cohort?cohort.name:cohortId}</span>
+              <span style="font-size:12px;color:#059669;background:#ecfdf5;border:1px solid #a7f3d0;padding:2px 8px;border-radius:12px;font-weight:700;">✓ ประเมินแล้ว ${records.length} กรรมการ</span>
+            </div>
+            <h3 style="font-size:24px;font-weight:900;color:#1e293b;margin:4px 0 0 0;">คะแนนแยกตามกรรมการ — ทีม ${teamCode}</h3>
+          </div>
+        </div>
+        <button onclick="set({selectedTeam:null})" style="background:#f1f5f9;border:none;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;color:#64748b;transition:all .2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">✕</button>
+      </div>
+
+      <!-- Average Summary Banner -->
+      <div style="background:linear-gradient(135deg,#4f46e5,#7c3aed);border-radius:20px;padding:20px 26px;margin-bottom:24px;color:#fff;display:flex;justify-content:space-between;align-items:center;box-shadow:0 8px 24px rgba(79,70,229,.25);">
+        <div>
+          <div style="font-size:13px;opacity:.8;font-weight:600;">คะแนนเฉลี่ยรวมทุกหมวด (จาก ${records.length} กรรมการ)</div>
+          <div style="font-size:44px;font-weight:900;line-height:1;margin-top:4px;">${avg} <span style="font-size:18px;opacity:.65;font-weight:400;">/ 100 คะแนน</span></div>
+        </div>
+        <div style="text-align:right;">
+          <div style="background:rgba(255,255,255,.2);backdrop-filter:blur(10px);border-radius:14px;padding:10px 20px;font-size:14px;font-weight:800;border:1px solid rgba(255,255,255,.3);">
+            🧑‍⚖️ ลงคะแนนแล้ว ${records.length} คน
+          </div>
+        </div>
+      </div>
+
+      <!-- Table 1: Comparison Matrix -->
+      <div style="margin-bottom:24px;background:#fff;border:1.5px solid #e2e8f0;border-radius:18px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.04);">
+        <div style="padding:14px 20px;background:linear-gradient(135deg,#f8faff,#eef2ff);border-bottom:1px solid #e2e8f0;font-weight:800;font-size:14px;color:#312e81;display:flex;align-items:center;gap:8px;">
+          <span style="font-size:16px;">📊</span> ตารางเปรียบเทียบคะแนนรายกรรมการ (Side-by-Side Comparison)
+        </div>
+        <div style="overflow-x:auto;">
+          <table style="width:100%;border-collapse:collapse;font-size:13px;text-align:center;">
+            <thead>
+              <tr style="background:#f8fafc;border-bottom:1px solid #e2e8f0;color:#64748b;font-size:11px;font-weight:700;">
+                <th style="padding:12px;text-align:left;">กรรมการ</th>
+                <th style="padding:12px;color:#4f46e5;font-weight:900;background:#f5f3ff;">รวม/100</th>
+                ${CATEGORIES.map(c=>`<th style="padding:12px 8px;">${c.title.length>12?c.title.slice(0,12)+'…':c.title}<br><span style="color:#94a3b8;font-weight:400;">(${c.max})</span></th>`).join('')}
+                <th style="padding:12px;text-align:left;">ความคิดเห็น</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${judgeTableRows}
+              <tr style="background:#eef2ff;font-weight:900;border-top:2.5px solid #c7d2fe;color:#312e81;">
+                <td style="padding:12px 14px;text-align:left;font-weight:900;">⭐ คะแนนเฉลี่ย (${records.length} คน)</td>
+                <td style="padding:12px;font-size:18px;color:#4338ca;background:#e0e7ff;">${avg}</td>
+                ${CATEGORIES.map(cat=>`<td style="padding:12px 8px;color:#4338ca;font-size:14px;">${catAvgRow[cat.id]}</td>`).join('')}
+                <td style="padding:12px 14px;text-align:left;font-size:12px;color:#6366f1;">-</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Section 2: Cards per judge -->
+      <div>
+        <div style="font-size:15px;font-weight:800;color:#1e293b;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+          <span>⚖️</span> รายละเอียดคะแนนแต่ละหมวดของกรรมการแต่ละคน (${records.length} คน)
+        </div>
+        ${judgeCards}
+      </div>
+
+    </div>
+  </div>`;
+}
+
+
+// ========================== MODAL ==========================
+function renderModal(){
+  if(!S.showModal)return'';
+  const cohort=COHORTS.find(c=>c.id===S.cohortId);
+  const tot=total(S.scores);
+  const r=tot>=90?{l:'ดีเยี่ยม ⭐',bg:'#fffbeb',c:'#d97706',bc:'#fde68a'}
+          :tot>=80?{l:'ดีมาก ✅',bg:'#ecfdf5',c:'#059669',bc:'#a7f3d0'}
+          :tot>=70?{l:'ดี 👍',bg:'#eff6ff',c:'#2563eb',bc:'#bfdbfe'}
+                  :{l:'ผ่านเกณฑ์',bg:'#f8fafc',c:'#64748b',bc:'#e2e8f0'};
+  return `
+  <div class="modal-ov" onclick="if(event.target===this)set({showModal:false})">
+    <div class="modal-box">
+      <h3 style="font-size:19px;font-weight:900;color:#1e293b;margin:0 0 18px 0;">🛡️ สรุปก่อนยืนยันบันทึก</h3>
+      <div style="background:#f8faff;border-radius:14px;padding:16px;margin-bottom:16px;font-size:13px;display:flex;flex-wrap:wrap;gap:16px;border:1px solid #e0e7ff;">
+        <div><span style="color:#64748b;">กรรมการ:</span> <strong style="color:#4338ca;">${S.judgeName}</strong></div>
+        <div><span style="color:#64748b;">รุ่น:</span> <strong style="color:#1e293b;">${cohort.name}</strong></div>
+        <div><span style="color:#64748b;">ทีม:</span> <strong style="color:#d97706;">${S.teamCode}</strong></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
+        ${CATEGORIES.map(cat=>{
+          const val=S.scores[cat.id]??0;
+          const pct=(parseFloat(val)||0)/cat.max*100;
+          return `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:${cat.bg};border-radius:12px;border:1px solid ${cat.border};">
+            <div style="width:8px;height:8px;border-radius:50%;background:${cat.bar};flex-shrink:0;"></div>
+            <div style="flex:1;font-size:12px;color:#1e293b;font-weight:600;">${cat.title}</div>
+            <div style="width:80px;background:#f1f5f9;border-radius:4px;height:5px;overflow:hidden;">
+              <div style="height:100%;width:${pct}%;background:${cat.bar};border-radius:4px;"></div>
+            </div>
+            <div style="font-size:13px;font-weight:800;color:${cat.color};min-width:50px;text-align:right;">${val} <span style="color:#94a3b8;font-weight:400;font-size:11px;">/ ${cat.max}</span></div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div style="background:linear-gradient(135deg,#4f46e5,#7c3aed);border-radius:16px;padding:20px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;color:#fff;box-shadow:0 6px 20px rgba(79,70,229,.3);">
+        <div>
+          <div style="font-size:12px;opacity:.75;">คะแนนรวมสุทธิ</div>
+          <div style="font-size:44px;font-weight:900;line-height:1;">${tot} <span style="font-size:16px;opacity:.6;font-weight:400;">/100</span></div>
+        </div>
+        <div style="background:${r.bg};color:${r.c};border:1px solid ${r.bc};padding:8px 18px;border-radius:20px;font-size:13px;font-weight:800;">${r.l}</div>
+      </div>
+      ${S.comment?`<div style="background:#f8faff;border:1px solid #e0e7ff;padding:12px 16px;border-radius:12px;margin-bottom:16px;font-size:12px;color:#64748b;font-style:italic;">"${S.comment}"</div>`:''}
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button class="btn btn-outline" onclick="set({showModal:false})">← กลับแก้ไข</button>
+        <button class="btn btn-green" onclick="confirmSave()">✓ ยืนยันบันทึกคะแนน</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ========================== EVENTS ==========================
+window.openTeamDetail=(cohortId,teamCode)=>{set({selectedTeam:{cohortId,teamCode}});};
+window.enterJudge=()=>{const ex=loadScore(S.cohortId,S.teamCode,S.judgeName);set({screen:'judge',scores:ex?.scores||{},comment:ex?.comment||'',errors:{}});};
+window.enterAdmin=()=>{if(S.loginPass===ADMIN_PASS)set({screen:'admin',loginPass:'',loginPassErr:false});else set({loginPassErr:true});};
+window.logout=()=>set({screen:'login',loginMode:'',loginPass:'',loginPassErr:false,scores:{},comment:'',errors:{},showModal:false});
+window.selectCohort=(id,t)=>{const ex=loadScore(id,t,S.judgeName);set({cohortId:id,teamCode:t,scores:ex?.scores||{},comment:ex?.comment||'',errors:{},showModal:false});};
+window.selectTeam=t=>{const ex=loadScore(S.cohortId,t,S.judgeName);set({teamCode:t,scores:ex?.scores||{},comment:ex?.comment||'',errors:{},showModal:false});};
+
+window.fillSample=()=>{
+  const sc={};
+  CATEGORIES.forEach(cat=>{
+    const ratio=0.72+Math.random()*0.2;
+    sc[cat.id]=Math.round(ratio*cat.max*10)/10;
+  });
+  S.scores=sc;S.errors={};
+  render();
+  // update bars & total display
+  const tot=total(sc);
+  const ts=document.getElementById('total_score');
+  const tb=document.getElementById('total_bar');
+  if(ts)ts.textContent=tot;
+  if(tb)tb.style.width=tot+'%';
+};
+
+window.onInp=(id,val,max,color)=>{
+  const num=parseFloat(val);
+  const over=val!==''&&!isNaN(num)&&num>parseFloat(max);
+  const inp=document.getElementById('inp_'+id);
+  const bar=document.getElementById('bar_'+id);
+  const errEl=document.getElementById('err_'+id);
+  if(inp){inp.style.borderColor=over?'#ef4444':val!==''?color:'';inp.style.boxShadow=over?'0 0 0 4px rgba(239,68,68,.1)':val!==''?'0 0 0 4px '+color+'25':'';}
+  if(bar){const pct=(!over&&val!==''&&!isNaN(num))?Math.min(100,(num/parseFloat(max))*100):0;bar.style.width=pct+'%';}
+  if(errEl){errEl.style.display=over?'flex':'none';}
+  S.scores={...S.scores,[id]:val};
+  const tot=total(S.scores);
+  const ts=document.getElementById('total_score');
+  const tb=document.getElementById('total_bar');
+  if(ts)ts.textContent=tot;
+  if(tb)tb.style.width=tot+'%';
+};
+
+window.openModal=()=>{
+  const newErrors={};let hasErr=false;
+  CATEGORIES.forEach(cat=>{
+    const v=S.scores[cat.id];
+    if(v===''||v===undefined||v===null){newErrors[cat.id]=`โปรดกรอกคะแนน (0–${cat.max})`;hasErr=true;}
+    else{const n=Number(v);
+      if(isNaN(n)||n<0){newErrors[cat.id]='คะแนนต้องเป็นตัวเลขที่ไม่ติดลบ';hasErr=true;}
+      else if(n>cat.max){newErrors[cat.id]=`เกินคะแนนเต็ม (สูงสุด ${cat.max})`;hasErr=true;}
+    }
+  });
+  if(hasErr){
+    set({errors:newErrors});
+    // scroll to first error
+    setTimeout(()=>{
+      const firstErr=document.querySelector('.err-card');
+      if(firstErr)firstErr.scrollIntoView({behavior:'smooth',block:'center'});
+    },100);
+    return;
+  }
+  set({errors:{},showModal:true});
+};
+
+window.confirmSave=()=>{
+  const tot=total(S.scores);
+  saveRec({cohortId:S.cohortId,teamCode:S.teamCode,judge:S.judgeName,scores:S.scores,total:tot,comment:S.comment});
+  set({showModal:false});
+  showToast(`บันทึกคะแนนทีม ${S.teamCode} สำเร็จ! (${tot} คะแนน)`);
+  render();
+};
+
+window.resetForm=()=>set({scores:{},comment:'',errors:{}});
+
+window.exportCSV=()=>{
+  const all=getAll();
+  if(!all.length){alert('ยังไม่มีข้อมูล');return;}
+  const hd=['รุ่น','ทีม','กรรมการ',...CATEGORIES.map(c=>c.title+' ('+c.max+')'),'รวม','ความคิดเห็น','วันที่'];
+  const rows=all.map(r=>{
+    const cName=COHORTS.find(c=>c.id===r.cohortId)?.name||r.cohortId;
+    const dt=r.savedAt?new Date(r.savedAt).toLocaleString('th-TH'):'-';
+    return [`"${cName}"`,`"${r.teamCode}"`,`"${r.judge}"`,...CATEGORIES.map(cat=>r.scores?.[cat.id]||0),r.total||0,`"${(r.comment||'').replace(/"/g,'""')}"`,`"${dt}"`];
+  });
+  const csv='\uFEFF'+[hd.join(','),...rows.map(r=>r.join(','))].join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));
+  a.download=`scoring_${new Date().toISOString().slice(0,10)}.csv`;a.click();
+};
+
+window.seedDemo=()=>{
+  if(!confirm('โหลดข้อมูลจำลอง? (จะแทนที่ข้อมูลเดิม)'))return;
+  clearAll();
+  const judges=['กรรมการ 1','กรรมการ 2','กรรมการ 3'];
+  const cmts=['Dashboard สวยงาม เลือกสีน่าสนใจมาก','การวิเคราะห์เชิงลึกดีมาก ตอบโจทย์งาน','ควรปรับ Storytelling ให้กระชับยิ่งขึ้น','ใช้ DAX ได้ยอดเยี่ยม Data Model ดีมาก','ไอเดียดีมาก มีความเป็นไปได้ในองค์กรสูง'];
+  const recs=[];
+  COHORTS.forEach(c=>c.teams.forEach((t,ti)=>{
+    const jc=Math.floor(Math.random()*2)+2;
+    for(let j=0;j<jc;j++){
+      const sc={};let tot=0;
+      CATEGORIES.forEach(cat=>{
+        const ratio=Math.min(Math.max(.65+Math.sin(ti*1.5+j)*.15+Math.random()*.1,0.6),1.0);
+        const s=Math.round(ratio*cat.max*10)/10;sc[cat.id]=Math.min(s,cat.max);tot+=sc[cat.id];
+      });
+      tot=Math.round(tot*10)/10;
+      const id=`${c.id}__${t}__${judges[j]}`;
+      recs.push({id,cohortId:c.id,teamCode:t,judge:judges[j],scores:sc,total:tot,comment:cmts[Math.floor(Math.random()*cmts.length)],savedAt:new Date(Date.now()-Math.random()*86400000*2).toISOString()});
+    }
+  }));
+  localStorage.setItem(SK,JSON.stringify(recs));
+  set({});
+  showToast(`โหลดข้อมูลจำลอง ${recs.length} รายการเรียบร้อย`);
+};
+
+// ========================== RENDER ==========================
+function render(){
+  document.getElementById('app').innerHTML=
+    S.screen==='login'?renderLogin():
+    S.screen==='judge'?renderJudge():
+    renderAdmin();
+}
+
+render();
+</script>
 </body>
 </html>

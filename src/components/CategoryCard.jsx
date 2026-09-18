@@ -109,6 +109,8 @@ export const CategoryCard = ({ category, value, onChange, error }) => {
               max={category.maxScore}
               value={value}
               onChange={handleInputChange}
+              onWheel={(e) => e.target.blur()}
+              onKeyDown={(e) => { if (e.key === 'ArrowUp' || e.key === 'ArrowDown') e.preventDefault(); }}
               placeholder={`0 - ${category.maxScore}`}
               className={`w-full text-center text-lg font-bold py-2.5 px-3 rounded-xl glass-input transition-all ${
                 isExceeded

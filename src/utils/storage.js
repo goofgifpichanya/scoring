@@ -7,7 +7,20 @@ export const getEvaluations = () => {
     const dataStr = localStorage.getItem(STORAGE_KEY);
     if (!dataStr) return [];
     const parsed = JSON.parse(dataStr);
-    return Array.isArray(parsed) ? parsed : [];
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map(item => {
+      const cleanScores = {};
+      if (item && item.scores) {
+        Object.keys(item.scores).forEach(k => {
+          cleanScores[k] = parseFloat(item.scores[k]) || 0;
+        });
+      }
+      return {
+        ...item,
+        totalScore: parseFloat(item?.totalScore) || 0,
+        scores: cleanScores
+      };
+    });
   } catch (err) {
     console.error('Error reading evaluations from localStorage:', err);
     return [];
@@ -266,3 +279,17 @@ export const exportToJSON = () => {
   link.click();
   document.body.removeChild(link);
 };
+
+export const getEvaluationsForTeam = (cohortId, teamCode) => {
+  const evaluations = getEvaluations();
+  return evaluations.filter(item => {
+    if (!item) return false;
+    const matchCohort = item.cohortId === cohortId || 
+      (cohortId === 'c1' && item.cohortId === 'cohort_1') || 
+      (cohortId === 'c2' && item.cohortId === 'cohort_2') ||
+      (cohortId === 'cohort_1' && item.cohortId === 'c1') ||
+      (cohortId === 'cohort_2' && item.cohortId === 'c2');
+    return matchCohort && item.teamCode === teamCode;
+  });
+};
+
