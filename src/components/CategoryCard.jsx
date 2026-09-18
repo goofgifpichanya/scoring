@@ -82,9 +82,9 @@ export const CategoryCard = ({ category, value, onChange, error }) => {
         </div>
       </div>
 
-      <p className="text-xs text-slate-400 mb-4 line-clamp-2 min-h-[32px]">
-        {category.description}
-      </p>
+      <div className="text-xs text-slate-300 bg-slate-950/80 p-2.5 rounded-xl border border-slate-800 mb-4 leading-relaxed">
+        <span className="font-bold text-indigo-400">📌 สิ่งที่กรรมการพิจารณา:</span> {category.description}
+      </div>
 
       {/* Input area */}
       <div className="space-y-3">
