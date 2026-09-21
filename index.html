@@ -539,7 +539,7 @@ function renderAdminNav(){
 function renderJudge(){
   const cohort=COHORTS.find(c=>c.id===S.cohortId);
   const evaluated=evaluatedByJudge(S.cohortId,S.judgeName);
-  const isSaved=evaluated.has(S.teamCode) && !S.unlockedTeams?.[`${S.cohortId}_${S.teamCode}`];
+  const isSaved=evaluated.has(S.teamCode);
   const tot=total(S.scores);
   const filledCount=CATEGORIES.filter(c=>S.scores[c.id]!==undefined&&S.scores[c.id]!=='').length;
 
@@ -623,7 +623,7 @@ function renderJudge(){
       <div style="font-size:13px;font-weight:700;color:#475569;margin-bottom:14px;">เลือกทีมที่ต้องการประเมิน (${cohort.name}):</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px;">${teamButtons}</div>
       <div style="font-size:11px;color:#94a3b8;margin-top:12px;display:flex;align-items:center;gap:6px;">
-        <span style="color:#059669;font-weight:700;">✓</span> = บันทึกแล้ว (สามารถกดแก้ไขได้)
+        <span style="color:#059669;font-weight:700;">✓</span> = บันทึกแล้ว (ไม่สามารถแก้ไขได้)
       </div>
     </div>
 
@@ -632,7 +632,7 @@ function renderJudge(){
       <div style="display:flex;align-items:center;gap:16px;">
         <div style="width:56px;height:56px;border-radius:18px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;border:2px solid rgba(255,255,255,.4);">${S.teamCode}</div>
         <div>
-          <div style="font-size:12px;opacity:.75;">${isSaved?'🔒 บันทึกคะแนนเรียบร้อย':'กำลังประเมินทีม:'}</div>
+          <div style="font-size:12px;opacity:.75;">${isSaved?'🔒 ดูคะแนนที่บันทึกแล้ว':'กำลังประเมินทีม:'}</div>
           <div style="font-size:20px;font-weight:900;">ทีม ${S.teamCode} · ${cohort.name}</div>
         </div>
       </div>
@@ -646,15 +646,12 @@ function renderJudge(){
     </div>
 
     ${isSaved ? `
-    <div style="background:#ecfdf5;border:1.5px solid #6ee7b7;border-radius:16px;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;">
-      <div style="display:flex;align-items:center;gap:14px;">
-        <div style="font-size:26px;flex-shrink:0;">🔒</div>
-        <div>
-          <div style="font-size:15px;font-weight:800;color:#065f46;">บันทึกคะแนนเรียบร้อยแล้ว</div>
-          <div style="font-size:13px;color:#047857;margin-top:2px;">ท่านสามารถเลือกทีมอื่นเพื่อลงคะแนน หรือกดปุ่มแก้ไขเพื่อปรับคะแนนทีมนี้</div>
-        </div>
+    <div style="background:#ecfdf5;border:1.5px solid #6ee7b7;border-radius:16px;padding:18px 24px;display:flex;align-items:center;gap:14px;">
+      <div style="font-size:26px;flex-shrink:0;">🔒</div>
+      <div>
+        <div style="font-size:15px;font-weight:800;color:#065f46;">บันทึกคะแนนเรียบร้อยแล้ว — ไม่สามารถแก้ไขได้</div>
+        <div style="font-size:13px;color:#047857;margin-top:2px;">กรุณาเลือกทีมอื่นเพื่อลงคะแนนต่อไป</div>
       </div>
-      <button class="btn btn-outline" style="border-color:#10b981;color:#047857;background:#fff;" onclick="unlockTeamEdit('${S.cohortId}','${S.teamCode}')">✏️ แก้ไขคะแนนทีมนี้</button>
     </div>` : ''}
 
     <!-- Category cards -->
@@ -1124,19 +1121,11 @@ window.openModal=()=>{
   set({errors:{},showModal:true});
 };
 
-window.unlockTeamEdit=(cohortId, teamCode)=>{
-  const unlocked = {...(S.unlockedTeams||{}), [`${cohortId}_${teamCode}`]: true};
-  set({unlockedTeams: unlocked});
-  showToast(`✏️ เปิดให้แก้ไขคะแนนทีม ${teamCode} แล้ว`);
-};
-
 window.confirmSave=()=>{
   try {
     const tot=total(S.scores);
     saveRec({cohortId:S.cohortId,teamCode:S.teamCode,judge:S.judgeName,scores:S.scores,total:tot,comment:S.comment});
-    const unlocked = {...(S.unlockedTeams||{})};
-    delete unlocked[`${S.cohortId}_${S.teamCode}`];
-    set({showModal:false, unlockedTeams:unlocked});
+    set({showModal:false});
     showToast(`✅ บันทึกคะแนนทีม ${S.teamCode} สำเร็จ! (${tot} คะแนน)`, 4000);
   } catch(e) {
     console.error("Error confirming save:", e);
