@@ -154,11 +154,18 @@
       .nav > div { padding: 8px 12px !important; height: auto !important; min-height: 56px; flex-wrap: wrap; gap: 8px; justify-content: space-between; }
       .container-pad { padding: 16px 12px 64px !important; gap: 16px !important; }
       .awards-grid { grid-template-columns: 1fr !important; gap: 14px !important; }
-      .modal-box { padding: 18px !important; border-radius: 20px !important; width: 96% !important; max-height: 94vh !important; }
+      .modal-box { padding: 18px !important; border-radius: 20px !important; width: 96% !important; max-height: 90vh !important; }
       .banner-flex { flex-direction: column !important; align-items: flex-start !important; }
       .banner-flex > div:last-child { text-align: left !important; width: 100%; margin-top: 8px; }
       .judge-modal-grid { grid-template-columns: repeat(2, 1fr) !important; }
       .cat-grid { grid-template-columns: 1fr !important; }
+    }
+
+    @media (max-width: 640px) {
+      .confirm-modal-box { padding: 16px 14px !important; border-radius: 20px !important; width: 96% !important; max-height: 88vh !important; }
+      .confirm-cat-list { max-height: 180px !important; }
+      .confirm-total-banner { padding: 12px 14px !important; }
+      .confirm-total-score { font-size: 32px !important; }
     }
 
     @media (max-width: 480px) {
@@ -1004,38 +1011,51 @@ function renderModal(){
                   :{l:'ผ่านเกณฑ์',bg:'#f8fafc',c:'#64748b',bc:'#e2e8f0'};
   return `
   <div class="modal-ov" onclick="if(event.target===this)set({showModal:false})">
-    <div class="modal-box">
-      <h3 style="font-size:19px;font-weight:900;color:#1e293b;margin:0 0 18px 0;">🛡️ สรุปก่อนยืนยันบันทึก</h3>
-      <div style="background:#f8faff;border-radius:14px;padding:16px;margin-bottom:16px;font-size:13px;display:flex;flex-wrap:wrap;gap:16px;border:1px solid #e0e7ff;">
+    <div class="modal-box confirm-modal-box">
+      <!-- Header -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <h3 style="font-size:17px;font-weight:900;color:#1e293b;margin:0;">🛡️ สรุปก่อนยืนยันบันทึก</h3>
+        <button onclick="set({showModal:false})" style="background:#f1f5f9;border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;color:#64748b;" title="ปิดหน้าต่าง">✕</button>
+      </div>
+
+      <!-- Info badge -->
+      <div style="background:#f8faff;border-radius:12px;padding:8px 12px;margin-bottom:10px;font-size:12px;display:flex;flex-wrap:wrap;gap:10px;border:1px solid #e0e7ff;">
         <div><span style="color:#64748b;">กรรมการ:</span> <strong style="color:#4338ca;">${S.judgeName}</strong></div>
         <div><span style="color:#64748b;">รุ่น:</span> <strong style="color:#1e293b;">${cohort.name}</strong></div>
         <div><span style="color:#64748b;">ทีม:</span> <strong style="color:#d97706;">${S.teamCode}</strong></div>
       </div>
-      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
+
+      <!-- Total score card -->
+      <div class="confirm-total-banner" style="background:linear-gradient(135deg,#4f46e5,#7c3aed);border-radius:14px;padding:12px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;color:#fff;box-shadow:0 4px 16px rgba(79,70,229,.25);">
+        <div>
+          <div style="font-size:11px;opacity:.8;">คะแนนรวมสุทธิ</div>
+          <div class="confirm-total-score" style="font-size:36px;font-weight:900;line-height:1;margin-top:2px;">${tot} <span style="font-size:14px;opacity:.7;font-weight:400;">/100</span></div>
+        </div>
+        <div style="background:${r.bg};color:${r.c};border:1px solid ${r.bc};padding:6px 14px;border-radius:20px;font-size:12px;font-weight:800;">${r.l}</div>
+      </div>
+
+      <!-- Category summary list -->
+      <div class="confirm-cat-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px;max-height:210px;overflow-y:auto;padding-right:2px;">
         ${CATEGORIES.map(cat=>{
           const val=S.scores[cat.id]??0;
           const pct=(parseFloat(val)||0)/cat.max*100;
-          return `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:${cat.bg};border-radius:12px;border:1px solid ${cat.border};">
-            <div style="width:8px;height:8px;border-radius:50%;background:${cat.bar};flex-shrink:0;"></div>
-            <div style="flex:1;font-size:12px;color:#1e293b;font-weight:600;">${cat.title}</div>
-            <div style="width:80px;background:#f1f5f9;border-radius:4px;height:5px;overflow:hidden;">
+          return `<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:${cat.bg};border-radius:10px;border:1px solid ${cat.border};">
+            <div style="width:7px;height:7px;border-radius:50%;background:${cat.bar};flex-shrink:0;"></div>
+            <div style="flex:1;font-size:12px;color:#1e293b;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${cat.title}</div>
+            <div style="width:55px;background:#f1f5f9;border-radius:4px;height:4px;overflow:hidden;flex-shrink:0;">
               <div style="height:100%;width:${pct}%;background:${cat.bar};border-radius:4px;"></div>
             </div>
-            <div style="font-size:13px;font-weight:800;color:${cat.color};min-width:50px;text-align:right;">${val} <span style="color:#94a3b8;font-weight:400;font-size:11px;">/ ${cat.max}</span></div>
+            <div style="font-size:12px;font-weight:800;color:${cat.color};min-width:44px;text-align:right;flex-shrink:0;">${val} <span style="color:#94a3b8;font-weight:400;font-size:10px;">/${cat.max}</span></div>
           </div>`;
         }).join('')}
       </div>
-      <div style="background:linear-gradient(135deg,#4f46e5,#7c3aed);border-radius:16px;padding:20px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;color:#fff;box-shadow:0 6px 20px rgba(79,70,229,.3);">
-        <div>
-          <div style="font-size:12px;opacity:.75;">คะแนนรวมสุทธิ</div>
-          <div style="font-size:44px;font-weight:900;line-height:1;">${tot} <span style="font-size:16px;opacity:.6;font-weight:400;">/100</span></div>
-        </div>
-        <div style="background:${r.bg};color:${r.c};border:1px solid ${r.bc};padding:8px 18px;border-radius:20px;font-size:13px;font-weight:800;">${r.l}</div>
-      </div>
-      ${S.comment?`<div style="background:#f8faff;border:1px solid #e0e7ff;padding:12px 16px;border-radius:12px;margin-bottom:16px;font-size:12px;color:#64748b;font-style:italic;">"${S.comment}"</div>`:''}
-      <div style="display:flex;gap:10px;justify-content:flex-end;">
-        <button class="btn btn-outline" onclick="set({showModal:false})">← กลับแก้ไข</button>
-        <button class="btn btn-green" onclick="confirmSave()">✓ ยืนยันบันทึกคะแนน</button>
+
+      ${S.comment?`<div style="background:#f8faff;border:1px solid #e0e7ff;padding:8px 12px;border-radius:10px;margin-bottom:10px;font-size:11px;color:#64748b;font-style:italic;">"${S.comment}"</div>`:''}
+
+      <!-- Sticky Action Footer -->
+      <div style="position:sticky;bottom:-16px;background:#fff;padding-top:10px;padding-bottom:4px;border-top:1px solid #f1f5f9;display:flex;gap:8px;justify-content:flex-end;margin-top:auto;z-index:20;">
+        <button class="btn btn-outline" style="padding:10px 14px;font-size:13px;" onclick="set({showModal:false})">← แก้ไข</button>
+        <button class="btn btn-green" style="padding:12px 18px;font-size:14px;flex:1;justify-content:center;box-shadow:0 4px 14px rgba(5,150,105,.35);" onclick="confirmSave()">✓ ยืนยันบันทึกคะแนน</button>
       </div>
     </div>
   </div>`;
