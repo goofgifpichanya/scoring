@@ -117,7 +117,7 @@ export const COHORTS = [
       { id: 'c2_11', code: 'ผท.', name: 'ทีม ผท.' },
       { id: 'c2_12', code: 'งส.', name: 'ทีม งส.' },
       { id: 'c2_13', code: 'ธต.', name: 'ทีม ธต.' },
-      { id: 'c2_14', code: 'LPS', name: 'ทีม LPS' },
+      { id: 'c2_14', code: 'บพ.', name: 'ทีม บพ.' },
       { id: 'c2_15', code: 'ธง.', name: 'ทีม ธง.' }
     ]
   }
